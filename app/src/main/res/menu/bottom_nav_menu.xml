@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeButton"
+        android:icon="@drawable/ic_home_foreground"
+        android:title="Home" />
+    <item
+        android:id="@+id/termsButton"
+        android:icon="@drawable/ic_terms_foreground"
+        android:title="Terms" />
+    <item
+        android:id="@+id/classesButton"
+        android:icon="@drawable/ic_classes_foreground"
+        android:title="Classes" />
+    <item
+        android:id="@+id/assessmentsButton"
+        android:icon="@drawable/ic_assessments_foreground"
+        android:title="Assessments" />
+
+
+</menu>

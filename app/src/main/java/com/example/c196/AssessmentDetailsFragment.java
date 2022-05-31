@@ -1,9 +1,19 @@
 package com.example.c196;
 
 import static com.example.c196.DateStringFormatter.formatDateForText;
+import static com.example.c196.R.id.assessFragmentContainerView;
+import static com.example.c196.R.id.assessmentDebugText;
+import static com.example.c196.R.id.assessmentEndDateSelectorButton;
+import static com.example.c196.R.id.assessmentEndDateText;
+import static com.example.c196.R.id.assessmentStartDateSelectorButton;
+import static com.example.c196.R.id.assessmentStartDateText;
+import static com.example.c196.R.id.assessmentTitleInput;
+import static com.example.c196.R.id.assessmentTypeSwitch;
+import static com.example.c196.R.id.deleteAssessmentButton;
 import static com.example.c196.R.id.endDateSelectorButton;
 import static com.example.c196.R.id.endDateText;
 import static com.example.c196.R.id.fragmentContainerView;
+import static com.example.c196.R.id.saveAssessmentButton;
 import static com.example.c196.R.id.startDateSelectorButton;
 import static com.example.c196.R.id.startDateText;
 import static com.example.c196.R.id.termTitleInput;
@@ -18,13 +28,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -32,11 +42,11 @@ import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link TermDetailsFragment#newInstance} factory method to
+ * Use the {@link AssessmentDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TermDetailsFragment extends Fragment {
-    //Instance of DB
+public class AssessmentDetailsFragment extends Fragment {
+    //Instance of database
     private TermDataBase tdb;
 
     //Views
@@ -46,7 +56,8 @@ public class TermDetailsFragment extends Fragment {
     private Button deleteButton;
     private TextView startText;
     private TextView endText;
-    private TextInputEditText termTitle;
+    private TextInputEditText assessTitle;
+    private Switch typeSwitch;
 
     //Debug view
     private TextView debugText;
@@ -55,15 +66,16 @@ public class TermDetailsFragment extends Fragment {
     private String title;
     private Date start;
     private Date end;
-    private TermObj newTerm;
+    private boolean isPerformance;
+    private AssessmentObj newAssessment;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TERM_OBJECT_PARAM = "param1";
+    private static final String ASSESSMENT_OBJECT_PARAM = "param1";
 
-    // A TermObj to show the details of
-    private TermObj detailedTerm;
+    // An AssessmentObj to show the details of
+    private AssessmentObj detailedAssessment;
 
-    public TermDetailsFragment() {
+    public AssessmentDetailsFragment() {
         // Required empty public constructor
     }
 
@@ -71,13 +83,13 @@ public class TermDetailsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param termToShowDetails a TermObj to show the details of
-     * @return A new instance of fragment TermDetailsFragment.
+     * @param assessmentToDisplay the assessment whose details should be shown
+     * @return A new instance of fragment AssessmentDetailsFragment.
      */
-    public static TermDetailsFragment newInstance(TermObj termToShowDetails) {
-        TermDetailsFragment fragment = new TermDetailsFragment();
+    public static AssessmentDetailsFragment newInstance(AssessmentObj assessmentToDisplay) {
+        AssessmentDetailsFragment fragment = new AssessmentDetailsFragment();
         Bundle args = new Bundle();
-        args.putSerializable(TERM_OBJECT_PARAM, termToShowDetails);
+        args.putSerializable(ASSESSMENT_OBJECT_PARAM, assessmentToDisplay);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,9 +97,8 @@ public class TermDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
-            detailedTerm = (TermObj) getArguments().getSerializable(TERM_OBJECT_PARAM);
+            detailedAssessment = (AssessmentObj) getArguments().getSerializable(ASSESSMENT_OBJECT_PARAM);
         }
     }
 
@@ -95,25 +106,26 @@ public class TermDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View root = inflater.inflate(R.layout.fragment_term_details, container, false);
+        View root = inflater.inflate(R.layout.fragment_assessment_details, container, false);
 
         //Get the instance of the database
         tdb = TermDataBase.getInstance(root.getContext());
 
         //Declare various views
-        termTitle = root.findViewById(termTitleInput);
-        startText = root.findViewById(startDateText);
-        endText = root.findViewById(endDateText);
-        saveButton = root.findViewById(R.id.saveButton);
-        startDate = root.findViewById(startDateSelectorButton);
-        endDate = root.findViewById(endDateSelectorButton);
-        deleteButton = root.findViewById(R.id.deleteButton);
+        assessTitle = root.findViewById(assessmentTitleInput);
+        startText = root.findViewById(assessmentStartDateText);
+        endText = root.findViewById(assessmentEndDateText);
+        saveButton = root.findViewById(saveAssessmentButton);
+        startDate = root.findViewById(assessmentStartDateSelectorButton);
+        endDate = root.findViewById(assessmentEndDateSelectorButton);
+        deleteButton = root.findViewById(deleteAssessmentButton);
+        typeSwitch = root.findViewById(assessmentTypeSwitch);
 
         //Debug text
-        debugText = root.findViewById(R.id.debugText);
+        debugText = root.findViewById(assessmentDebugText);
 
         //Setup different uses of this fragment
-        if (detailedTerm != null) {
+        if (detailedAssessment != null) {
             fillDetails();
         } else {
             setupEmptyForm();
@@ -144,11 +156,11 @@ public class TermDetailsFragment extends Fragment {
      * @return
      */
     public boolean validateForm() {
-        if (TextUtils.isEmpty(termTitle.getText().toString())) {
-            termTitle.setHint("Term Title is Required");
+        if (TextUtils.isEmpty(assessTitle.getText().toString())) {
+            assessTitle.setHint("Assessment Title is Required");
             return false;
         } else {
-            title = Objects.requireNonNull(termTitle.getText()).toString();
+            title = Objects.requireNonNull(assessTitle.getText()).toString();
         }
         if ((startText.getText().toString().equals("No Start Date Set") || startText.getText().toString().equals("Start Date Required")) || start == null) {
             startText.setText("Start Date Required");
@@ -158,7 +170,7 @@ public class TermDetailsFragment extends Fragment {
             endText.setText("End Date Required");
             return false;
         }
-        newTerm = new TermObj(title, start, end);
+        newAssessment = new AssessmentObj(title, start, end, isPerformance);
         return true;
     }
 
@@ -169,11 +181,12 @@ public class TermDetailsFragment extends Fragment {
         //saveButton button OnClickListener
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
-                tdb.addTerm(newTerm);
+                tdb.addAssessment(newAssessment);
                 returnToListView();
             }
         });
 
+        setupSwitch();
         setUpDatePickers();
     }
 
@@ -196,17 +209,24 @@ public class TermDetailsFragment extends Fragment {
         });
     }
 
+    private void setupSwitch() {
+        typeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
+            isPerformance = b;
+            debugText.setText("Switch is " + b + "\nisPerformance is " + isPerformance);
+        });
+    }
+
     /**
      * Fills in details when launched with a selected Term
      */
     private void fillDetails() {
         int y, m, d;
 
-        termTitle.setText(detailedTerm.getTitle());
-        termTitle.setEnabled(false);
-        termTitle.setHint("");
+        assessTitle.setText(detailedAssessment.getTitle());
+        assessTitle.setEnabled(false);
+        assessTitle.setHint("");
 
-        start = detailedTerm.getStartDate();
+        start = detailedAssessment.getStartDate();
         Calendar cal = new GregorianCalendar();
         cal.setTime(start);
         y = cal.get(Calendar.YEAR);
@@ -214,7 +234,7 @@ public class TermDetailsFragment extends Fragment {
         d = cal.get(Calendar.DAY_OF_MONTH);
         startText.setText(formatDateForText(y, m-1, d));
 
-        end = detailedTerm.getEndDate();
+        end = detailedAssessment.getEndDate();
         cal.setTime(end);
         y = cal.get(Calendar.YEAR);
         m = cal.get(Calendar.MONTH);
@@ -223,34 +243,37 @@ public class TermDetailsFragment extends Fragment {
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
-            termTitle.setHint("e.g. Term 1");
-            termTitle.setEnabled(true);
+            assessTitle.setHint("e.g. Term 1");
+            assessTitle.setEnabled(true);
             setUpDatePickers();
             updatedSaveButton();
         });
 
         deleteButton.setVisibility(View.VISIBLE);
-        //TODO Constrain delete if classes are attached to term
         deleteButton.setOnClickListener(v -> {
             if (true) {
-                tdb.deleteTerm(detailedTerm);
+                tdb.deleteAssessment(detailedAssessment);
                 returnToListView();
             }
         });
+
+        typeSwitch.setChecked(detailedAssessment.isPerformance());
+
+        setupSwitch();
     }
 
     private void updatedSaveButton() {
         saveButton.setText("Save");
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
-                newTerm.setId(detailedTerm.getId());
-                tdb.updateTerm(newTerm);
+                newAssessment.setId(detailedAssessment.getId());
+                tdb.updateAssessment(newAssessment);
                 returnToListView();
             }
         });
     }
 
     private void returnToListView() {
-        getActivity().getSupportFragmentManager().beginTransaction().replace(fragmentContainerView, new TermListFragment()).commit();
+        getActivity().getSupportFragmentManager().beginTransaction().replace(assessFragmentContainerView, new AssessmentListFragment()).commit();
     }
 }

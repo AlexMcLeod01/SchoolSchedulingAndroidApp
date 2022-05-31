@@ -1,5 +1,6 @@
 package com.example.c196;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * Simple objects to help TermList object work
  */
-public class TermObj {
+public class TermObj implements Serializable {
     private int id;
     private String title;
     private Date startDate;
@@ -65,6 +66,14 @@ public class TermObj {
      * @param end
      */
     public TermObj(int id, String title, Date start, Date end) {
+        setId(id);
+        setTitle(title);
+        setStartDate(start);
+        setEndDate(end);
+        this.courses = new ArrayList<>();
+    }
+
+    public TermObj(String title, Date start, Date end) {
         setId(id);
         setTitle(title);
         setStartDate(start);

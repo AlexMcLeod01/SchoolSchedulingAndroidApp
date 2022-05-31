@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -27,6 +28,8 @@ import com.google.android.material.navigation.NavigationBarView;
 public class Terms extends AppCompatActivity {
     private Button listButton;
     private Button detailButton;
+
+    private static TermObj selectedTerm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +82,15 @@ public class Terms extends AppCompatActivity {
         Fragment frag = null;
         switch (view.getId()) {
             case termDetailButton:
-                frag = new TermDetailsFragment();
+                if (selectedTerm == null) {
+                    frag = new TermDetailsFragment();
+                } else {
+                    frag = TermDetailsFragment.newInstance(selectedTerm);
+                    selectedTerm = null;
+                }
                 break;
             case termListButton:
+
                 frag = new TermListFragment();
                 break;
         }
@@ -114,5 +123,9 @@ public class Terms extends AppCompatActivity {
         };
         listButton.setOnClickListener(click);
         detailButton.setOnClickListener(click);
+    }
+
+    public static void setSelectedTerm(TermObj term) {
+        selectedTerm = term;
     }
 }

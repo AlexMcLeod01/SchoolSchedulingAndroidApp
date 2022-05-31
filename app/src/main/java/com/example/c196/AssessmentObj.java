@@ -1,11 +1,13 @@
 package com.example.c196;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Assessment object to help with CourseObj model
  */
-public class AssessmentObj {
+public class AssessmentObj implements Serializable {
+    private int id;
     private String title;
     private Date startDate;
     private Date endDate;
@@ -14,6 +16,9 @@ public class AssessmentObj {
     /**
      *A bunch of getters and setters
      */
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
 
     public String getTitle() {
         return title;

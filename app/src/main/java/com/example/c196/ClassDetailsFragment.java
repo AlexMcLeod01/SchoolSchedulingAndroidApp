@@ -1,12 +1,24 @@
 package com.example.c196;
 
 import static com.example.c196.DateStringFormatter.formatDateForText;
-import static com.example.c196.R.id.endDateSelectorButton;
-import static com.example.c196.R.id.endDateText;
-import static com.example.c196.R.id.fragmentContainerView;
-import static com.example.c196.R.id.startDateSelectorButton;
-import static com.example.c196.R.id.startDateText;
-import static com.example.c196.R.id.termTitleInput;
+import static com.example.c196.R.id.assessFragmentContainerView;
+import static com.example.c196.R.id.assessmentDebugText;
+import static com.example.c196.R.id.assessmentEndDateSelectorButton;
+import static com.example.c196.R.id.assessmentEndDateText;
+import static com.example.c196.R.id.assessmentStartDateSelectorButton;
+import static com.example.c196.R.id.assessmentStartDateText;
+import static com.example.c196.R.id.assessmentTitleInput;
+import static com.example.c196.R.id.classDebugText;
+import static com.example.c196.R.id.classEndDateSelectorButton;
+import static com.example.c196.R.id.classEndDateText;
+import static com.example.c196.R.id.classFragmentContainerView;
+import static com.example.c196.R.id.classStartDateSelectorButton;
+import static com.example.c196.R.id.classStartDateText;
+import static com.example.c196.R.id.classTitleInput;
+import static com.example.c196.R.id.deleteAssessmentButton;
+import static com.example.c196.R.id.deleteClassButton;
+import static com.example.c196.R.id.saveAssessmentButton;
+import static com.example.c196.R.id.saveClassButton;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -23,20 +35,16 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link TermDetailsFragment#newInstance} factory method to
+ * Use the {@link ClassDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TermDetailsFragment extends Fragment {
-    //Instance of DB
+public class ClassDetailsFragment extends Fragment {
+    //Instance of database
     private TermDataBase tdb;
 
     //Views
@@ -46,7 +54,7 @@ public class TermDetailsFragment extends Fragment {
     private Button deleteButton;
     private TextView startText;
     private TextView endText;
-    private TextInputEditText termTitle;
+    private TextInputEditText classTitle;
 
     //Debug view
     private TextView debugText;
@@ -55,15 +63,16 @@ public class TermDetailsFragment extends Fragment {
     private String title;
     private Date start;
     private Date end;
-    private TermObj newTerm;
+    private String status;
+    private CourseObj newCourse;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TERM_OBJECT_PARAM = "param1";
+    private static final String CLASS_OBJECT_PARAM = "param1";
 
-    // A TermObj to show the details of
-    private TermObj detailedTerm;
+    // An AssessmentObj to show the details of
+    private CourseObj detailedClass;
 
-    public TermDetailsFragment() {
+    public ClassDetailsFragment() {
         // Required empty public constructor
     }
 
@@ -71,13 +80,13 @@ public class TermDetailsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param termToShowDetails a TermObj to show the details of
-     * @return A new instance of fragment TermDetailsFragment.
+     * @param course CourseObj
+     * @return A new instance of fragment ClassDetailsFragment.
      */
-    public static TermDetailsFragment newInstance(TermObj termToShowDetails) {
-        TermDetailsFragment fragment = new TermDetailsFragment();
+    public static ClassDetailsFragment newInstance(CourseObj course) {
+        ClassDetailsFragment fragment = new ClassDetailsFragment();
         Bundle args = new Bundle();
-        args.putSerializable(TERM_OBJECT_PARAM, termToShowDetails);
+        args.putSerializable(CLASS_OBJECT_PARAM, course);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,9 +94,8 @@ public class TermDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
-            detailedTerm = (TermObj) getArguments().getSerializable(TERM_OBJECT_PARAM);
+            detailedClass = (CourseObj) getArguments().getSerializable(CLASS_OBJECT_PARAM);
         }
     }
 
@@ -95,30 +103,29 @@ public class TermDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View root = inflater.inflate(R.layout.fragment_term_details, container, false);
+        View root = inflater.inflate(R.layout.fragment_class_details, container, false);
 
         //Get the instance of the database
         tdb = TermDataBase.getInstance(root.getContext());
 
         //Declare various views
-        termTitle = root.findViewById(termTitleInput);
-        startText = root.findViewById(startDateText);
-        endText = root.findViewById(endDateText);
-        saveButton = root.findViewById(R.id.saveButton);
-        startDate = root.findViewById(startDateSelectorButton);
-        endDate = root.findViewById(endDateSelectorButton);
-        deleteButton = root.findViewById(R.id.deleteButton);
+        classTitle = root.findViewById(classTitleInput);
+        startText = root.findViewById(classStartDateText);
+        endText = root.findViewById(classEndDateText);
+        saveButton = root.findViewById(saveClassButton);
+        startDate = root.findViewById(classStartDateSelectorButton);
+        endDate = root.findViewById(classEndDateSelectorButton);
+        deleteButton = root.findViewById(deleteClassButton);
 
         //Debug text
-        debugText = root.findViewById(R.id.debugText);
+        debugText = root.findViewById(classDebugText);
 
         //Setup different uses of this fragment
-        if (detailedTerm != null) {
-            fillDetails();
+        if (detailedClass != null) {
+            //fillDetails();
         } else {
             setupEmptyForm();
         }
-
 
         return root;
     }
@@ -140,15 +147,29 @@ public class TermDetailsFragment extends Fragment {
     };
 
     /**
+     * Sets up the empty form
+     */
+    private void setupEmptyForm() {
+        //saveButton button OnClickListener
+        saveButton.setOnClickListener(v -> {
+            if (validateForm()) {
+                tdb.addCourse(newCourse);
+                returnToListView();
+            }
+        });
+        setUpDatePickers();
+    }
+
+    /**
      * Input validation for the form before saving
      * @return
      */
     public boolean validateForm() {
-        if (TextUtils.isEmpty(termTitle.getText().toString())) {
-            termTitle.setHint("Term Title is Required");
+        if (TextUtils.isEmpty(classTitle.getText().toString())) {
+            classTitle.setHint("Assessment Title is Required");
             return false;
         } else {
-            title = Objects.requireNonNull(termTitle.getText()).toString();
+            title = Objects.requireNonNull(classTitle.getText()).toString();
         }
         if ((startText.getText().toString().equals("No Start Date Set") || startText.getText().toString().equals("Start Date Required")) || start == null) {
             startText.setText("Start Date Required");
@@ -158,23 +179,8 @@ public class TermDetailsFragment extends Fragment {
             endText.setText("End Date Required");
             return false;
         }
-        newTerm = new TermObj(title, start, end);
+        newCourse = new CourseObj(title, start, end, "");
         return true;
-    }
-
-    /**
-     * Sets up the empty form
-     */
-    private void setupEmptyForm() {
-        //saveButton button OnClickListener
-        saveButton.setOnClickListener(v -> {
-            if (validateForm()) {
-                tdb.addTerm(newTerm);
-                returnToListView();
-            }
-        });
-
-        setUpDatePickers();
     }
 
     /**
@@ -196,62 +202,18 @@ public class TermDetailsFragment extends Fragment {
         });
     }
 
-    /**
-     * Fills in details when launched with a selected Term
-     */
-    private void fillDetails() {
-        int y, m, d;
-
-        termTitle.setText(detailedTerm.getTitle());
-        termTitle.setEnabled(false);
-        termTitle.setHint("");
-
-        start = detailedTerm.getStartDate();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(start);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d));
-
-        end = detailedTerm.getEndDate();
-        cal.setTime(end);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d));
-
-        saveButton.setText("Update");
-        saveButton.setOnClickListener(v -> {
-            termTitle.setHint("e.g. Term 1");
-            termTitle.setEnabled(true);
-            setUpDatePickers();
-            updatedSaveButton();
-        });
-
-        deleteButton.setVisibility(View.VISIBLE);
-        deleteButton.setOnClickListener(v -> {
-            if (tdb.getCourseByTermId(detailedTerm.getId()).size() == 0) {
-                tdb.deleteTerm(detailedTerm);
-                returnToListView();
-            } else {
-                //TODO error message
-            }
-        });
-    }
-
     private void updatedSaveButton() {
         saveButton.setText("Save");
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
-                newTerm.setId(detailedTerm.getId());
-                tdb.updateTerm(newTerm);
+                newCourse.setId(detailedClass.getId());
+                tdb.updateCourse(newCourse);
                 returnToListView();
             }
         });
     }
 
     private void returnToListView() {
-        getActivity().getSupportFragmentManager().beginTransaction().replace(fragmentContainerView, new TermListFragment()).commit();
+        getActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new AssessmentListFragment()).commit();
     }
 }

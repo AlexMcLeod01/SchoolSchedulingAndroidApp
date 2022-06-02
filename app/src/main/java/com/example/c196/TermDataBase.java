@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,7 +19,7 @@ import java.util.List;
  */
 public class TermDataBase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "terms.db";
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
 
     private static TermDataBase tdb;
 
@@ -41,7 +43,32 @@ public class TermDataBase extends SQLiteOpenHelper {
         private static final String TERM_END = "end_date";
     }
 
-    //Secondary table "classes"
+    //Secondary table "course" and tertiary tables that Classes activity requires
+    private static final class CourseTable {
+        private static final String TABLE = "course";
+        private static final String COURSE_ID = "course_id";
+        private static final String COURSE_TITLE = "title";
+        private static final String COURSE_START = "start_date";
+        private static final String COURSE_END = "end_date";
+        private static final String COURSE_STATUS = "status";
+        private static final String TERM_ID = "term_id";
+    }
+
+    private static final class CourseNotesTable {
+        private static final String TABLE = "course_notes";
+        private static final String NOTES_ID = "notes_id";
+        private static final String NOTE = "note";
+        private static final String COURSE_ID = "course_id";
+    }
+
+    private static final class InstructorTable {
+        private static final String TABLE = "instructor";
+        private static final String INSTRUCTOR_ID = "instructor_id";
+        private static final String INSTRUCTOR_NAME = "name";
+        private static final String INSTRUCTOR_PHONE = "phone_number";
+        private static final String INSTRUCTOR_EMAIL = "email_address";
+        private static final String COURSE_ID = "course_id";
+    }
 
     //Tertiary table "assessments"
     private static final class AssessmentsTable {
@@ -63,23 +90,46 @@ public class TermDataBase extends SQLiteOpenHelper {
                 TermTable.TERM_START + " text, " +
                 TermTable.TERM_END + " text)");
 
-        //Next create table "classes"
+        //Next create table "course"
+        db.execSQL("create table " + CourseTable.TABLE + " (" +
+                CourseTable.COURSE_ID + " integer primary key autoincrement, " +
+                CourseTable.COURSE_TITLE + " text, " +
+                CourseTable.COURSE_START + " text, " +
+                CourseTable.COURSE_END + " text, " +
+                CourseTable.COURSE_STATUS + " text, " +
+                CourseTable.TERM_ID + " integer references " + TermTable.TABLE + ")");
 
-        //Then create table "assessments"
+        //And the supplementary course tables
+        db.execSQL("create table " + CourseNotesTable.TABLE + " (" +
+                CourseNotesTable.NOTES_ID + " integer primary key autoincrement, " +
+                CourseNotesTable.NOTE + " text, " +
+                CourseNotesTable.COURSE_ID + " integer references " + CourseTable.TABLE + ")");
+
+        db.execSQL("create table " + InstructorTable.TABLE + " (" +
+                InstructorTable.INSTRUCTOR_ID + " integer primary key autoincrement, " +
+                InstructorTable.INSTRUCTOR_NAME + " text, " +
+                InstructorTable.INSTRUCTOR_PHONE + " text, " +
+                InstructorTable.INSTRUCTOR_EMAIL + " text, " +
+                InstructorTable.COURSE_ID + " integer references " + CourseTable.TABLE +")");
+
+        //Finally create table "assessments"
         db.execSQL("create table " + AssessmentsTable.TABLE + " (" +
                 AssessmentsTable.ASSESSMENT_ID + " integer primary key autoincrement, " +
                 AssessmentsTable.ASSESSMENT_TITLE + " text, " +
                 AssessmentsTable.ASSESSMENT_START + " text, " +
                 AssessmentsTable.ASSESSMENT_END + " text," +
                 AssessmentsTable.ASSESSMENT_TYPE + " int check (" + AssessmentsTable.ASSESSMENT_TYPE + " in (0, 1))," +
-                AssessmentsTable.CLASS_ID + " integer)");
+                AssessmentsTable.CLASS_ID + " integer references " + CourseTable.TABLE + ")");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //Drop old tables
-        db.execSQL("drop table if exists " + TermTable.TABLE);
         db.execSQL("drop table if exists " + AssessmentsTable.TABLE);
+        db.execSQL("drop table if exists " + CourseNotesTable.TABLE);
+        db.execSQL("drop table if exists " + InstructorTable.TABLE);
+        db.execSQL("drop table if exists " + CourseTable.TABLE);
+        db.execSQL("drop table if exists " + TermTable.TABLE);
 
         //Rebuild
         onCreate(db);
@@ -157,8 +207,10 @@ public class TermDataBase extends SQLiteOpenHelper {
      */
     public void deleteTerm(TermObj term) {
         SQLiteDatabase db = getWritableDatabase();
-        db.delete(TermTable.TABLE,
-                TermTable.TERM_ID + " = ?", new String[] {Integer.toString(term.getId()) });
+        if (getCourseByTermId(term.getId()).size() == 0) {
+            db.delete(TermTable.TABLE,
+                    TermTable.TERM_ID + " = ?", new String[]{Integer.toString(term.getId())});
+        }
     }
 
     /**
@@ -205,8 +257,266 @@ public class TermDataBase extends SQLiteOpenHelper {
     }
 
     /******************************************************************************************
-     **********************************CLASS TABLE*********************************************
+     **********************************COURSE TABLE*********************************************
      ******************************************************************************************/
+    /**
+     * Getting the courses set for the term with term_id id
+     * @return List of CourseObj
+     */
+    public List<CourseObj> getCourseByTermId(int termId) {
+        List<CourseObj> courses = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+
+        String orderBy = CourseTable.COURSE_START + " asc";
+
+        String sql = "select * from " + CourseTable.TABLE + " where " +  CourseTable.TERM_ID + " = " + termId +
+                " order by " + orderBy;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String title = cursor.getString(1);
+                Date start;
+                Date end;
+                String status = cursor.getString(4);
+                try {
+                    start = date.parse(cursor.getString(2));
+                    end = date.parse(cursor.getString(3));
+                    CourseObj c = new CourseObj(title, start, end, status);
+                    c.setId(id);
+                    c.setTermId(termId);
+                    courses.add(c);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return courses;
+    }
+
+    /**
+     * Getting course with course id
+     * @return CourseObj
+     */
+    public CourseObj getCourseById(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        CourseObj c = null;
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+
+        String sql = "select * from " + CourseTable.TABLE + "where " +  CourseTable.COURSE_ID + " = " + id;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                cursor.getInt(0);
+                String title = cursor.getString(1);
+                Date start;
+                Date end;
+                String status = cursor.getString(4);
+                int termId = cursor.getInt(5);
+                try {
+                    start = date.parse(cursor.getString(2));
+                    end = date.parse(cursor.getString(3));
+                    c = new CourseObj(title, start, end, status);
+                    c.setId(id);
+                    c.setTermId(termId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    c = new CourseObj();
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return c;
+    }
+
+    /**
+     * Adds a CourseObj to the Terms database
+     * @param course CourseObj
+     * @return true if success
+     */
+    public boolean addCourse (CourseObj course) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CourseTable.COURSE_TITLE, course.getTitle());
+        values.put(CourseTable.COURSE_START, dateFormat.format(course.getStartDate()));
+        values.put(CourseTable.COURSE_END, dateFormat.format(course.getEndDate()));
+        values.put(CourseTable.COURSE_STATUS, course.getStatus());
+        values.put(CourseTable.TERM_ID, course.getTermId());
+        long id = db.insert(CourseTable.TABLE, null, values);
+        return id != -1;
+    }
+
+    /**
+     * Deletes the given CourseObj from database
+     * @param course CourseObj
+     */
+    public void deleteCourse(CourseObj course) {
+        SQLiteDatabase db = getWritableDatabase();
+        if (1 == 1) {
+            db.delete(CourseTable.TABLE,
+                    CourseTable.COURSE_ID + " = ?", new String[]{Integer.toString(course.getId())});
+        }
+    }
+
+    /**
+     * Updates the given CourseObj
+     * @param course CourseObj
+     */
+    public void updateCourse(CourseObj course) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CourseTable.COURSE_TITLE, course.getTitle());
+        values.put(CourseTable.COURSE_START, dateFormat.format(course.getStartDate()));
+        values.put(CourseTable.COURSE_END, dateFormat.format(course.getEndDate()));
+        values.put(CourseTable.COURSE_STATUS, course.getStatus());
+        values.put(CourseTable.TERM_ID, course.getTermId());
+        db.update(CourseTable.TABLE, values,
+                CourseTable.COURSE_ID + " = ?", new String[] { Integer.toString(course.getId())});
+    }
+
+    /******************************************************************************************
+     *******************************OTHER COURSES SUB TABLES***********************************
+     ******************************************************************************************/
+
+    //Course Notes Table Functions
+    /**
+     * Getting the notes set for the course with course_id id
+     * @return List of CourseNotesObj
+     */
+    public List<CourseNoteObj> getNotesByCourseId(int courseId) {
+        List<CourseNoteObj> notes = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String orderBy = CourseNotesTable.NOTES_ID + " asc";
+
+        String sql = "select * from " + CourseNotesTable.TABLE + "where " +  CourseNotesTable.COURSE_ID + " = " + courseId +
+                " order by " + orderBy;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String note = cursor.getString(1);
+                CourseNoteObj n = new CourseNoteObj(note, courseId);
+                n.setId(id);
+                notes.add(n);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return notes;
+    }
+
+    /**
+     * Adds a CourseNoteObj to the Terms database
+     * @param notes CourseNoteObj
+     * @return true if success
+     */
+    public boolean addNote (CourseNoteObj notes) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CourseNotesTable.NOTE, notes.getNote());
+        values.put(CourseNotesTable.COURSE_ID, notes.getCourse_id());
+        long id = db.insert(CourseNotesTable.TABLE, null, values);
+        return id != -1;
+    }
+
+    /**
+     * Deletes the given CourseNoteObj from database
+     * @param notes CourseNoteObj
+     */
+    public void deleteNote(CourseNoteObj notes) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(CourseNotesTable.TABLE, CourseNotesTable.NOTES_ID + " = ?",
+                new String[]{Integer.toString(notes.getId())});
+    }
+
+    /**
+     * Updates the given CourseNoteObj
+     * @param notes CourseNoteObj
+     */
+    public void updateNote(CourseNoteObj notes) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CourseNotesTable.NOTE, notes.getNote());
+        values.put(CourseNotesTable.COURSE_ID, notes.getCourse_id());
+        db.update(CourseNotesTable.TABLE, values,
+                CourseNotesTable.NOTES_ID + " = ?", new String[] { Integer.toString(notes.getId())});
+    }
+
+    //Instructor Table functions
+    /**
+     * Getting the instructors set for the course with course_id id
+     * @return List of CourseInstructor
+     */
+    public List<CourseInstructor> getInstructorByCourseId(int courseId) {
+        List<CourseInstructor> instructor = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String orderBy = InstructorTable.INSTRUCTOR_ID + " asc";
+
+        String sql = "select * from " + InstructorTable.TABLE + "where " +  InstructorTable.COURSE_ID + " = " + courseId +
+                " order by " + orderBy;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+                String phone = cursor.getString(2);
+                String email = cursor.getString(3);
+                CourseInstructor i = new CourseInstructor(name, phone, email);
+                i.setCourseId(courseId);
+                i.setId(id);
+                instructor.add(i);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return instructor;
+    }
+
+    /**
+     * Adds a CourseInstructor to the Terms database
+     * @param instructor CourseInstructor
+     * @return true if success
+     */
+    public boolean addInstructor (CourseInstructor instructor) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(InstructorTable.INSTRUCTOR_NAME, instructor.getName());
+        values.put(InstructorTable.INSTRUCTOR_PHONE, instructor.getPhoneNumber());
+        values.put(InstructorTable.INSTRUCTOR_EMAIL, instructor.getEmailAddress());
+        long id = db.insert(InstructorTable.TABLE, null, values);
+        return id != -1;
+    }
+
+    /**
+     * Deletes the given CourseInstructor from database
+     * @param instructor CourseInstructor
+     */
+    public void deleteInstructor(CourseInstructor instructor) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(InstructorTable.TABLE, InstructorTable.INSTRUCTOR_ID + " = ?",
+                new String[]{Integer.toString(instructor.getId())});
+    }
+
+    /**
+     * Updates the given CourseInstructor
+     * @param instructor CourseInstructor
+     */
+    public void updateInstructor(CourseInstructor instructor) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(InstructorTable.INSTRUCTOR_NAME, instructor.getName());
+        values.put(InstructorTable.INSTRUCTOR_PHONE, instructor.getPhoneNumber());
+        values.put(InstructorTable.INSTRUCTOR_EMAIL, instructor.getEmailAddress());
+        db.update(InstructorTable.TABLE, values,
+                InstructorTable.INSTRUCTOR_ID + " = ?", new String[] { Integer.toString(instructor.getId())});
+    }
+
 
     /******************************************************************************************
      ********************************ASSESSMENT TABLE******************************************
@@ -287,6 +597,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         values.put(AssessmentsTable.ASSESSMENT_START, dateFormat.format(assess.getStartDate()));
         values.put(AssessmentsTable.ASSESSMENT_END, dateFormat.format(assess.getEndDate()));
         values.put(AssessmentsTable.ASSESSMENT_TYPE, assess.isPerformance()? 1 : 0);
+        values.put(AssessmentsTable.CLASS_ID, assess.getCourseId());
         db.update(AssessmentsTable.TABLE, values,
                 AssessmentsTable.ASSESSMENT_ID + " = ?", new String[] { Integer.toString(assess.getId())});
     }
@@ -316,6 +627,43 @@ public class TermDataBase extends SQLiteOpenHelper {
                     end = date.parse(cursor.getString(3));
                     assess = new AssessmentObj(title, start, end, perform);
                     assess.setId(id);
+                } catch (Exception e) {
+                    assess = new AssessmentObj("", new Date (), new Date(), false);
+                    assess.setId(-1);
+                    e.printStackTrace();
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return assess;
+    }
+
+    /**
+     * Gets an Assessment by course_id
+     * @param courseId course id
+     * @return AssessmentObj
+     */
+    public AssessmentObj getAssessmentByCourseId(int courseId) {
+        AssessmentObj assess = null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+
+        String sql = "select * from " + AssessmentsTable.TABLE + " where " + AssessmentsTable.CLASS_ID + "= " + courseId;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String title = cursor.getString(1);
+                Date start;
+                Date end;
+                boolean perform = cursor.getInt(4) == 1;
+                try {
+                    start = date.parse(cursor.getString(2));
+                    end = date.parse(cursor.getString(3));
+                    assess = new AssessmentObj(title, start, end, perform);
+                    assess.setId(id);
+                    assess.setCourseId(courseId);
                 } catch (Exception e) {
                     assess = new AssessmentObj("", new Date (), new Date(), false);
                     assess.setId(-1);

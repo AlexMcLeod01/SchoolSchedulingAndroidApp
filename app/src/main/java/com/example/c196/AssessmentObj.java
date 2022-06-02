@@ -12,6 +12,7 @@ public class AssessmentObj implements Serializable {
     private Date startDate;
     private Date endDate;
     private boolean isPerformance; //true if performance, false if objective
+    private int courseId;
 
     /**
      *A bunch of getters and setters
@@ -52,10 +53,19 @@ public class AssessmentObj implements Serializable {
         isPerformance = performance;
     }
 
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
+    }
+
     public AssessmentObj(String title, Date start, Date end, boolean perform) {
         setTitle(title);
         setStartDate(start);
         setEndDate(end);
         setPerformance(perform);
+        setCourseId(-1);
     }
 }

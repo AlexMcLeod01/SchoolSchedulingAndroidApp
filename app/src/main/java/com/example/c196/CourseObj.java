@@ -1,5 +1,6 @@
 package com.example.c196;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,7 +8,8 @@ import java.util.List;
 /**
  * A model object for Courses to help TermObj and TermList
  */
-public class CourseObj {
+public class CourseObj implements Serializable {
+    private int id;
     private String title;
     private Date startDate;
     private Date endDate;
@@ -15,11 +17,20 @@ public class CourseObj {
     private List<CourseInstructor> instructorList;
     private List<AssessmentObj> assessmentList;
     private List<String> courseNotes;
+    private int termId;
 
 
     /**
      * Getters and Setters for CourseObj
      */
+
+    public int getTermId() { return termId; }
+
+    public void setTermId(int term) { this.termId = term; }
+
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
 
     public String getTitle() {
         return title;
@@ -113,8 +124,22 @@ public class CourseObj {
         setStartDate(start);
         setEndDate(end);
         setStatus(status);
+        setId(-1);
+        setTermId(-1);
         this.instructorList = new ArrayList<>();
         this.assessmentList = new ArrayList<>();
         this.courseNotes = new ArrayList<>();
+    }
+
+    /**
+     * Default constructor
+     */
+    public CourseObj() {
+        setId(-1);
+        setTitle("");
+        setStartDate(new Date());
+        setEndDate(new Date());
+        setStatus("");
+        setTermId(-1);
     }
 }

@@ -4,14 +4,20 @@ package com.example.c196;
  * CourseInstructor Object to help CourseObj
  */
 public class CourseInstructor {
+    private int id;
     private String name;
     private String phoneNumber;
     private String emailAddress;
+    private int courseId;
 
 
     /**
      * Just a bunch of getters and setters
      */
+
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
 
     public String getName() {
         return name;
@@ -35,6 +41,14 @@ public class CourseInstructor {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 
     /**

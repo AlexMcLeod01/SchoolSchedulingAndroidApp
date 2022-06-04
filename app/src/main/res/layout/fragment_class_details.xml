@@ -158,7 +158,7 @@
                 android:text="Debug Text Will Appear Here"
                 android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="classEndDateSelectorButton" />
+                app:layout_constraintTop_toBottomOf="@id/classEndDateSelectorButton" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

@@ -124,8 +124,7 @@ public class CourseObj implements Serializable {
         setStartDate(start);
         setEndDate(end);
         setStatus(status);
-        setId(-1);
-        setTermId(-1);
+        setTermId(0);
         this.instructorList = new ArrayList<>();
         this.assessmentList = new ArrayList<>();
         this.courseNotes = new ArrayList<>();

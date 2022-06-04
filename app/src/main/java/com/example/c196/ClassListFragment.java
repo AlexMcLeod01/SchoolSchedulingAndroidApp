@@ -72,7 +72,7 @@ public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemC
         //Try to display Terms list
         recyclerView = view.findViewById(classList);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        displayClasses(view, -1);
+        displayClasses(view, 0);
     }
 
     private void displayClasses(View view, int termId) {
@@ -85,9 +85,9 @@ public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemC
                     + " End: " + dateFormat.format(c.getEndDate()) + " Status: " + c.getStatus() + "\n");
         }
         if (classText.size() == 0) {
-            classText.add("No Assessments Yet");
+            classText.add("No Classes Yet");
         } else {
-            classText.remove("No Assessments Yet");
+            classText.remove("No Classes Yet");
         }
         adapter = new RecyclerAdapter(this.getContext(), classText, R.layout.list_layout, listItem);
         adapter.setClickListener(this);

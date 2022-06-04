@@ -35,7 +35,9 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Objects;
 
 /**
@@ -122,7 +124,7 @@ public class ClassDetailsFragment extends Fragment {
 
         //Setup different uses of this fragment
         if (detailedClass != null) {
-            //fillDetails();
+            fillDetails();
         } else {
             setupEmptyForm();
         }
@@ -208,6 +210,48 @@ public class ClassDetailsFragment extends Fragment {
             if (validateForm()) {
                 newCourse.setId(detailedClass.getId());
                 tdb.updateCourse(newCourse);
+                returnToListView();
+            }
+        });
+    }
+
+    /**
+     * Fills in details when launched with a selected Term
+     */
+    private void fillDetails() {
+        int y, m, d;
+
+        classTitle.setText(detailedClass.getTitle());
+        classTitle.setEnabled(false);
+        classTitle.setHint("");
+
+        start = detailedClass.getStartDate();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(start);
+        y = cal.get(Calendar.YEAR);
+        m = cal.get(Calendar.MONTH);
+        d = cal.get(Calendar.DAY_OF_MONTH);
+        startText.setText(formatDateForText(y, m-1, d));
+
+        end = detailedClass.getEndDate();
+        cal.setTime(end);
+        y = cal.get(Calendar.YEAR);
+        m = cal.get(Calendar.MONTH);
+        d = cal.get(Calendar.DAY_OF_MONTH);
+        endText.setText(formatDateForText(y, m-1, d));
+
+        saveButton.setText("Update");
+        saveButton.setOnClickListener(v -> {
+            classTitle.setHint("e.g. Underwater Basketry");
+            classTitle.setEnabled(true);
+            setUpDatePickers();
+            updatedSaveButton();
+        });
+
+        deleteButton.setVisibility(View.VISIBLE);
+        deleteButton.setOnClickListener(v -> {
+            if (true) {
+                tdb.deleteCourse(detailedClass);
                 returnToListView();
             }
         });

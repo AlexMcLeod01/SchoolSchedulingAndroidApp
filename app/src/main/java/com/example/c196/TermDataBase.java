@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class TermDataBase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "terms.db";
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
 
     private static TermDataBase tdb;
 
@@ -89,6 +89,17 @@ public class TermDataBase extends SQLiteOpenHelper {
                 TermTable.TERM_TITLE + " text, " +
                 TermTable.TERM_START + " text, " +
                 TermTable.TERM_END + " text)");
+
+        //Insert a term placeholder for unassigned classes
+        TermObj noTerm = new TermObj("Not Yet Assigned", new Date(), new Date());
+        noTerm.setId(0);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        ContentValues values = new ContentValues();
+        values.put(TermTable.TERM_ID, noTerm.getId());
+        values.put(TermTable.TERM_TITLE, noTerm.getTitle());
+        values.put(TermTable.TERM_START, dateFormat.format(noTerm.getStartDate()));
+        values.put(TermTable.TERM_END, dateFormat.format(noTerm.getEndDate()));
+        long id = db.insert(TermTable.TABLE, null, values);
 
         //Next create table "course"
         db.execSQL("create table " + CourseTable.TABLE + " (" +
@@ -307,7 +318,7 @@ public class TermDataBase extends SQLiteOpenHelper {
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 
-        String sql = "select * from " + CourseTable.TABLE + "where " +  CourseTable.COURSE_ID + " = " + id;
+        String sql = "select * from " + CourseTable.TABLE + " where " +  CourseTable.COURSE_ID + " = " + id;
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor.moveToFirst()) {
             do {
@@ -395,7 +406,7 @@ public class TermDataBase extends SQLiteOpenHelper {
 
         String orderBy = CourseNotesTable.NOTES_ID + " asc";
 
-        String sql = "select * from " + CourseNotesTable.TABLE + "where " +  CourseNotesTable.COURSE_ID + " = " + courseId +
+        String sql = "select * from " + CourseNotesTable.TABLE + " where " +  CourseNotesTable.COURSE_ID + " = " + courseId +
                 " order by " + orderBy;
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor.moveToFirst()) {
@@ -459,7 +470,7 @@ public class TermDataBase extends SQLiteOpenHelper {
 
         String orderBy = InstructorTable.INSTRUCTOR_ID + " asc";
 
-        String sql = "select * from " + InstructorTable.TABLE + "where " +  InstructorTable.COURSE_ID + " = " + courseId +
+        String sql = "select * from " + InstructorTable.TABLE + " where " +  InstructorTable.COURSE_ID + " = " + courseId +
                 " order by " + orderBy;
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor.moveToFirst()) {

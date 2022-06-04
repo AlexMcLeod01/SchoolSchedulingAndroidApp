@@ -100,7 +100,7 @@ public class Classes extends AppCompatActivity {
     public void switchFragment(View view) {
         Fragment frag = null;
         switch (view.getId()) {
-            case assessmentDetailButton:
+            case classDetailButton:
                 if (selected == null) {
                     frag = new ClassDetailsFragment();
                 } else {
@@ -108,11 +108,11 @@ public class Classes extends AppCompatActivity {
                     selected = null;
                 }
                 break;
-            case assessmentListButton:
-
+            case classListButton:
                 frag = new ClassListFragment();
                 break;
         }
+        System.out.println(frag);
         setFragment(frag);
     }
 

@@ -148,17 +148,168 @@
                 app:layout_constraintTop_toBottomOf="@id/classEndLabel" />
 
             <TextView
-                android:id="@+id/classDebugText"
+                android:id="@+id/classStatusLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="15dp"
-                android:text="Debug Text Will Appear Here"
+                android:text="Class Status:"
                 android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/classEndDateSelectorButton" />
+
+            <Spinner
+                android:id="@+id/classStatusSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/classStatusLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/classInstructorsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:text="Instructors:"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/classStatusSpinner" />
+
+            <Spinner
+                android:id="@+id/classInstructorsSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/classInstructorsLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="20dp"/>
+
+            <TextView
+                android:id="@+id/classInstructorsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:text=""
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/classInstructorsSpinner" />
+
+            <Button
+                android:id="@+id/addInstructorButton"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="30dp"
+                android:text="Add Instructor"
+                app:layout_constraintTop_toBottomOf="@id/classInstructorsText"
+                app:layout_constraintEnd_toStartOf="@id/updateInstructorButton"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <Button
+                android:id="@+id/updateInstructorButton"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="10dp"
+                android:text="Update/Remove Instructor"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/addInstructorButton"
+                app:layout_constraintTop_toBottomOf="@id/classInstructorsText" />
+
+
+            <TextView
+            android:id="@+id/classNotesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:text="Notes:"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addInstructorButton" />
+
+            <Spinner
+            android:id="@+id/classNotesSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/classNotesLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="20dp"/>
+
+            <TextView
+            android:id="@+id/classNotesText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:text=""
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/classNotesSpinner" />
+
+            <Button
+                android:id="@+id/addNoteButton"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="30dp"
+                android:text="Add Course Note"
+                app:layout_constraintTop_toBottomOf="@id/classNotesText"
+                app:layout_constraintEnd_toStartOf="@id/updateNoteButton"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <Button
+                android:id="@+id/updateNoteButton"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="10dp"
+                android:text="Update/Remove Course Note"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/addNoteButton"
+                app:layout_constraintTop_toBottomOf="@id/classNotesText" />
+
+            <TextView
+                android:id="@+id/classAssessmentsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:text="Assessments:"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/addNoteButton" />
+
+            <TextView
+                android:id="@+id/classAssessmentsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="40dp"
+                android:text=""
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/classAssessmentsLabel" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

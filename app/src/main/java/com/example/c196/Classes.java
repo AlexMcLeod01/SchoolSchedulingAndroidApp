@@ -10,6 +10,7 @@ import static com.example.c196.R.id.classFragmentContainerView;
 import static com.example.c196.R.id.classListButton;
 import static com.example.c196.R.id.classesButton;
 import static com.example.c196.R.id.homeButton;
+import static com.example.c196.R.id.termSelectionSpinner;
 import static com.example.c196.R.id.termsButton;
 
 import androidx.annotation.NonNull;
@@ -22,35 +23,59 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
-public class Classes extends AppCompatActivity {
+import java.util.List;
+
+public class Classes extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    //views
     private Button listButton;
     private Button detailButton;
+    private BottomNavigationView bottomNavigation;
+    private Spinner termSpinner;
 
+    private TermDataBase tdb;
+
+    //data to be passed
     private static CourseObj selected;
+    private List<TermObj> terms;
+    private List<CourseObj> courses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_classes);
 
+        //Database get
+        tdb = TermDataBase.getInstance(getApplicationContext());
+        terms = tdb.getTerms();
+        courses = tdb.getCourseByTermId(0);
+
+        //Views initialize
+        listButton = findViewById(classListButton);
+        detailButton = findViewById(classDetailButton);
+        termSpinner = findViewById(termSelectionSpinner);
+
         //Set Term List as first fragment
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         //Append fragment to ViewGroup ConstraintLayout
-        transaction.add(classFragmentContainerView, new ClassListFragment());
+        transaction.add(classFragmentContainerView, ClassListFragment.newInstance(courses));
         transaction.commit();
 
         //Setup fragment switching due to button presses
         addButtonListeners();
+        setupSpinner();
 
         //Setup Bottom Navigation Menu
-        BottomNavigationView bottomNavigation = findViewById(bottomNavView);
+        bottomNavigation = findViewById(bottomNavView);
         bottomNavigation.setSelectedItemId(classesButton);
         bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -76,12 +101,18 @@ public class Classes extends AppCompatActivity {
         });
     }
 
+    private void setupSpinner() {
+        ArrayAdapter<TermObj> adapter = new ArrayAdapter<TermObj>(getApplicationContext(),
+                android.R.layout.simple_spinner_item, terms);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        termSpinner.setAdapter(adapter);
+        termSpinner.setOnItemSelectedListener(this);
+    }
+
     /**
      * A listener to cause the buttons to call switch_fragment
      */
     public void addButtonListeners() {
-        listButton = findViewById(classListButton);
-        detailButton = findViewById(classDetailButton);
 
         View.OnClickListener click = new View.OnClickListener() {
             @Override
@@ -101,6 +132,8 @@ public class Classes extends AppCompatActivity {
         Fragment frag = null;
         switch (view.getId()) {
             case classDetailButton:
+                termSpinner.setVisibility(View.GONE);
+                bottomNavigation.setVisibility(View.GONE);
                 if (selected == null) {
                     frag = new ClassDetailsFragment();
                 } else {
@@ -109,10 +142,11 @@ public class Classes extends AppCompatActivity {
                 }
                 break;
             case classListButton:
-                frag = new ClassListFragment();
+                termSpinner.setVisibility(View.VISIBLE);
+                bottomNavigation.setVisibility(View.VISIBLE);
+                frag = ClassListFragment.newInstance(courses);
                 break;
         }
-        System.out.println(frag);
         setFragment(frag);
     }
 
@@ -128,5 +162,22 @@ public class Classes extends AppCompatActivity {
 
     public static void setSelectedClass(CourseObj course) {
         selected = course;
+    }
+
+    /**
+     * For the OnItemSelectedListener implementation
+     */
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        TermObj term = (TermObj) parent.getItemAtPosition(pos);
+        int termId = term.getId();
+        courses = tdb.getCourseByTermId(termId);
+        termSpinner.setVisibility(View.VISIBLE);
+        bottomNavigation.setVisibility(View.VISIBLE);
+        Fragment frag = ClassListFragment.newInstance(courses);
+        setFragment(frag);
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        //Do nothing when nothing selected
     }
 }

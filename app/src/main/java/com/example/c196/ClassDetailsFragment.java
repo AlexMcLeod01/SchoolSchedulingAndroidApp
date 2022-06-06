@@ -1,24 +1,25 @@
 package com.example.c196;
 
 import static com.example.c196.DateStringFormatter.formatDateForText;
-import static com.example.c196.R.id.assessFragmentContainerView;
-import static com.example.c196.R.id.assessmentDebugText;
-import static com.example.c196.R.id.assessmentEndDateSelectorButton;
-import static com.example.c196.R.id.assessmentEndDateText;
-import static com.example.c196.R.id.assessmentStartDateSelectorButton;
-import static com.example.c196.R.id.assessmentStartDateText;
-import static com.example.c196.R.id.assessmentTitleInput;
-import static com.example.c196.R.id.classDebugText;
+import static com.example.c196.R.id.addInstructorButton;
+import static com.example.c196.R.id.addNoteButton;
+import static com.example.c196.R.id.bottomNavView;
+import static com.example.c196.R.id.classAssessmentsText;
 import static com.example.c196.R.id.classEndDateSelectorButton;
 import static com.example.c196.R.id.classEndDateText;
 import static com.example.c196.R.id.classFragmentContainerView;
+import static com.example.c196.R.id.classInstructorsSpinner;
+import static com.example.c196.R.id.classInstructorsText;
+import static com.example.c196.R.id.classNotesSpinner;
+import static com.example.c196.R.id.classNotesText;
 import static com.example.c196.R.id.classStartDateSelectorButton;
 import static com.example.c196.R.id.classStartDateText;
+import static com.example.c196.R.id.classStatusSpinner;
 import static com.example.c196.R.id.classTitleInput;
-import static com.example.c196.R.id.deleteAssessmentButton;
 import static com.example.c196.R.id.deleteClassButton;
-import static com.example.c196.R.id.saveAssessmentButton;
 import static com.example.c196.R.id.saveClassButton;
+import static com.example.c196.R.id.updateInstructorButton;
+import static com.example.c196.R.id.updateNoteButton;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -29,15 +30,20 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,21 +51,31 @@ import java.util.Objects;
  * Use the {@link ClassDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ClassDetailsFragment extends Fragment {
+public class ClassDetailsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     //Instance of database
     private TermDataBase tdb;
+
+    //ArrayAdapter for statusSpinner
+    ArrayAdapter<CharSequence> statusAdapter;
 
     //Views
     private Button startDate;
     private Button endDate;
     private Button saveButton;
     private Button deleteButton;
+    private Button addInstructor;
+    private Button updateInstructor;
+    private Button addNote;
+    private Button updateNote;
     private TextView startText;
     private TextView endText;
+    private TextView instructorList;
+    private TextView noteList;
+    private TextView assessmentList;
     private TextInputEditText classTitle;
-
-    //Debug view
-    private TextView debugText;
+    private Spinner statusSpinner;
+    private Spinner instructorSpinner;
+    private Spinner noteSpinner;
 
     //Instance variables for saving the data
     private String title;
@@ -71,8 +87,11 @@ public class ClassDetailsFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String CLASS_OBJECT_PARAM = "param1";
 
-    // An AssessmentObj to show the details of
+    //A CourseObj to show the details of
     private CourseObj detailedClass;
+    private List<CourseInstructor> detailedInstructors;
+    private List<CourseNoteObj> courseNotes;
+    private List<AssessmentObj> courseAssessments;
 
     public ClassDetailsFragment() {
         // Required empty public constructor
@@ -110,17 +129,15 @@ public class ClassDetailsFragment extends Fragment {
         //Get the instance of the database
         tdb = TermDataBase.getInstance(root.getContext());
 
-        //Declare various views
-        classTitle = root.findViewById(classTitleInput);
-        startText = root.findViewById(classStartDateText);
-        endText = root.findViewById(classEndDateText);
-        saveButton = root.findViewById(saveClassButton);
-        startDate = root.findViewById(classStartDateSelectorButton);
-        endDate = root.findViewById(classEndDateSelectorButton);
-        deleteButton = root.findViewById(deleteClassButton);
+        if (detailedClass != null) {
+            int id = detailedClass.getId();
+            detailedInstructors = tdb.getInstructorByCourseId(id);
+            courseNotes = tdb.getNotesByCourseId(id);
+            courseAssessments = tdb.getAssessmentByCourseId(id);
+        }
 
-        //Debug text
-        debugText = root.findViewById(classDebugText);
+        declareViews(root);
+        setupStatusSpinner();
 
         //Setup different uses of this fragment
         if (detailedClass != null) {
@@ -132,11 +149,32 @@ public class ClassDetailsFragment extends Fragment {
         return root;
     }
 
+    private void declareViews(View root) {
+        //Declare various views from top to bottom
+        classTitle = root.findViewById(classTitleInput);
+        startText = root.findViewById(classStartDateText);
+        endText = root.findViewById(classEndDateText);
+        saveButton = root.findViewById(saveClassButton);
+        startDate = root.findViewById(classStartDateSelectorButton);
+        endDate = root.findViewById(classEndDateSelectorButton);
+        deleteButton = root.findViewById(deleteClassButton);
+        statusSpinner = root.findViewById(classStatusSpinner);
+        addInstructor = root.findViewById(addInstructorButton);
+        updateInstructor = root.findViewById(updateInstructorButton);
+        instructorList = root.findViewById(classInstructorsText);
+        instructorSpinner = root.findViewById(classInstructorsSpinner);
+        addNote = root.findViewById(addNoteButton);
+        updateNote = root.findViewById(updateNoteButton);
+        noteList = root.findViewById(classNotesText);
+        noteSpinner = root.findViewById(classNotesSpinner);
+        assessmentList = root.findViewById(classAssessmentsText);
+    }
+
     DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             start = DateStringFormatter.formatDateForDatabase(year, month, day);
-            startText.setText(formatDateForText(year, month, day));
+            startText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -144,7 +182,7 @@ public class ClassDetailsFragment extends Fragment {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             end = DateStringFormatter.formatDateForDatabase(year, month, day);
-            endText.setText(formatDateForText(year, month, day));
+            endText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -159,16 +197,26 @@ public class ClassDetailsFragment extends Fragment {
                 returnToListView();
             }
         });
+        addInstructor.setOnClickListener(v -> {
+            if (validateForm()) {
+                sendToInstructorForm(newCourse);
+            }
+        });
+        addNote.setOnClickListener(v -> {
+            if (validateForm()) {
+                sendToNoteForm(newCourse);
+            }
+        });
         setUpDatePickers();
     }
 
     /**
      * Input validation for the form before saving
-     * @return
+     * @return true if valid
      */
     public boolean validateForm() {
         if (TextUtils.isEmpty(classTitle.getText().toString())) {
-            classTitle.setHint("Assessment Title is Required");
+            classTitle.setHint("Class Title is Required");
             return false;
         } else {
             title = Objects.requireNonNull(classTitle.getText()).toString();
@@ -181,7 +229,14 @@ public class ClassDetailsFragment extends Fragment {
             endText.setText("End Date Required");
             return false;
         }
-        newCourse = new CourseObj(title, start, end, "");
+        newCourse = new CourseObj(title, start, end, status);
+        if(detailedClass != null) {
+            if(detailedClass.getId() >= 0) {
+                newCourse.setId(detailedClass.getId());
+            } else {
+                newCourse.setId(-1);
+            }
+        }
         return true;
     }
 
@@ -204,12 +259,15 @@ public class ClassDetailsFragment extends Fragment {
         });
     }
 
-    private void updatedSaveButton() {
+    private void updateFormButtons() {
         saveButton.setText("Save");
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
-                newCourse.setId(detailedClass.getId());
-                tdb.updateCourse(newCourse);
+                if (newCourse.getId() >= 0) {
+                    tdb.updateCourse(newCourse);
+                } else {
+                    tdb.addCourse(newCourse);
+                }
                 returnToListView();
             }
         });
@@ -219,33 +277,22 @@ public class ClassDetailsFragment extends Fragment {
      * Fills in details when launched with a selected Term
      */
     private void fillDetails() {
-        int y, m, d;
+        fillButtons();
+        fillCalendars();
+        fillTextBoxes();
+        fillSpinners();
+    }
 
-        classTitle.setText(detailedClass.getTitle());
-        classTitle.setEnabled(false);
-        classTitle.setHint("");
-
-        start = detailedClass.getStartDate();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(start);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d));
-
-        end = detailedClass.getEndDate();
-        cal.setTime(end);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d));
-
+    private void fillButtons() {
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
             classTitle.setHint("e.g. Underwater Basketry");
             classTitle.setEnabled(true);
+            statusSpinner.setEnabled(true);
+            instructorSpinner.setEnabled(true);
+            noteSpinner.setEnabled(true);
             setUpDatePickers();
-            updatedSaveButton();
+            updateFormButtons();
         });
 
         deleteButton.setVisibility(View.VISIBLE);
@@ -255,9 +302,135 @@ public class ClassDetailsFragment extends Fragment {
                 returnToListView();
             }
         });
+
+        addInstructor.setOnClickListener(v -> {
+            if (validateForm()) {
+                sendToInstructorForm(newCourse);
+            }
+        });
+
+        updateInstructor.setVisibility(View.VISIBLE);
+        updateInstructor.setOnClickListener(v -> {
+            if (validateForm()) {
+                CourseInstructor instructor = (CourseInstructor) instructorSpinner.getSelectedItem();
+                sendToInstructorForm(newCourse, instructor);
+            }
+        });
+
+        addNote.setOnClickListener(v -> {
+            if (validateForm()) {
+                sendToNoteForm(newCourse);
+            }
+        });
+
+        updateNote.setVisibility(View.VISIBLE);
+        updateNote.setOnClickListener(v -> {
+            if (validateForm()) {
+                CourseNoteObj note = (CourseNoteObj) noteSpinner.getSelectedItem();
+                sendToNoteForm(newCourse, note);
+            }
+        });
+    }
+
+    private void fillCalendars() {
+        int y, m, d;
+
+        start = detailedClass.getStartDate();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(start);
+        y = cal.get(Calendar.YEAR);
+        m = cal.get(Calendar.MONTH);
+        d = cal.get(Calendar.DAY_OF_MONTH);
+        startText.setText(formatDateForText(y, m-1, d, true));
+
+        end = detailedClass.getEndDate();
+        cal.setTime(end);
+        y = cal.get(Calendar.YEAR);
+        m = cal.get(Calendar.MONTH);
+        d = cal.get(Calendar.DAY_OF_MONTH);
+        endText.setText(formatDateForText(y, m-1, d, true));
+    }
+
+    private void fillTextBoxes() {
+        classTitle.setText(detailedClass.getTitle());
+        classTitle.setEnabled(false);
+        classTitle.setHint("");
+
+        StringBuilder instruct = new StringBuilder();
+        for (CourseInstructor instructor : detailedInstructors) {
+            instruct.append(instructor.getName() + " " + instructor.getPhoneNumber() + " " + instructor.getEmailAddress() + "\n");
+        }
+        instructorList.setText(instruct);
+
+        StringBuilder notes = new StringBuilder();
+        for (CourseNoteObj note : courseNotes) {
+            notes.append(note.getNote() + "\n");
+        }
+        noteList.setText(notes);
+
+        StringBuilder assessment = new StringBuilder();
+        for (AssessmentObj a : courseAssessments) {
+            assessment.append(a.toString());
+        }
+        assessmentList.setText(assessment);
+    }
+
+    private void fillSpinners() {
+        status = detailedClass.getStatus();
+        statusSpinner.setSelection(statusAdapter.getPosition(status));
+        statusSpinner.setEnabled(false);
+
+        ArrayAdapter<CourseInstructor> adapter = new ArrayAdapter<CourseInstructor>(getContext(),
+                android.R.layout.simple_spinner_item, detailedInstructors);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        instructorSpinner.setAdapter(adapter);
+        instructorSpinner.setEnabled(false);
+
+        ArrayAdapter<CourseNoteObj> noteAdapter = new ArrayAdapter<CourseNoteObj>(getContext(),
+                android.R.layout.simple_spinner_item, courseNotes);
+        noteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        noteSpinner.setAdapter(noteAdapter);
+        noteSpinner.setEnabled(false);
+    }
+
+    private void setupStatusSpinner() {
+        statusAdapter = ArrayAdapter.createFromResource(getContext(), R.array.class_status_array,
+                android.R.layout.simple_spinner_item);
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statusSpinner.setAdapter(statusAdapter);
+        statusSpinner.setOnItemSelectedListener(this);
     }
 
     private void returnToListView() {
-        getActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new AssessmentListFragment()).commit();
+        BottomNavigationView bNav = getActivity().findViewById(bottomNavView);
+        bNav.setVisibility(View.VISIBLE);
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new ClassListFragment()).commit();
+    }
+
+    private void sendToInstructorForm(CourseObj course) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new ClassInstructorFragment().newInstance(course)).commit();
+    }
+
+    private void sendToInstructorForm(CourseObj course, CourseInstructor instructor) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new ClassInstructorFragment().newInstance(course, instructor)).commit();
+    }
+
+    private void sendToNoteForm(CourseObj course) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new CourseNotesFragment().newInstance(course)).commit();
+    }
+
+    private void sendToNoteForm(CourseObj course, CourseNoteObj note) {
+        requireActivity().getSupportFragmentManager().beginTransaction().replace(classFragmentContainerView, new CourseNotesFragment().newInstance(course, note)).commit();
+    }
+
+    /**
+     * For the OnItemSelectedListener implementation
+     */
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        status = (String) parent.getItemAtPosition(pos);
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        //Do nothing when nothing selected
     }
 }

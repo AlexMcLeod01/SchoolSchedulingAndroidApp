@@ -20,6 +20,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.02" />
 
+    <Spinner
+        android:id="@+id/termSelectionSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classTitle"
+        android:visibility="visible"/>
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/classFragmentContainerView"
         android:name="com.example.c196.AssessmentListFragment"
@@ -29,7 +41,8 @@
         app:layout_constraintBottom_toTopOf="@id/classDetailButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/classTitle" />
+        app:layout_constraintTop_toBottomOf="@id/termSelectionSpinner"
+        android:layout_marginTop="10dp"/>
 
     <Button
         android:id="@+id/classDetailButton"

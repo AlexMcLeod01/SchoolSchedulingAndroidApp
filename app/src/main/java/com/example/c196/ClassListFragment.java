@@ -3,6 +3,7 @@ package com.example.c196;
 import static com.example.c196.R.id.assessmentList;
 import static com.example.c196.R.id.classList;
 import static com.example.c196.R.id.listItem;
+import static com.example.c196.R.id.termSelectionSpinner;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,7 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +33,21 @@ import java.util.regex.Pattern;
  * create an instance of this fragment.
  */
 public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemClickListener {
+    //Database
     private TermDataBase tdb;
+
+    //Views
     private RecyclerAdapter adapter;
     private RecyclerView recyclerView;
+
+    //Selection data
     private String selected;
+    private static List<CourseObj> courses;
 
     final static Pattern firstInt = Pattern.compile("^[0-9]+");
+
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String CLASS_LIST_PARAM = "param1";
 
     public ClassListFragment() {
         // Required empty public constructor
@@ -44,14 +59,20 @@ public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemC
      *
      * @return A new instance of fragment ClassListFragment.
      */
-    public static ClassListFragment newInstance() {
+    public static ClassListFragment newInstance(List<CourseObj> courseList) {
         ClassListFragment fragment = new ClassListFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(CLASS_LIST_PARAM, (Serializable) courseList);
+        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            courses = (List<CourseObj>) getArguments().getSerializable(CLASS_LIST_PARAM);
+        }
     }
 
     @Override
@@ -69,17 +90,18 @@ public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemC
         //Get database instance
         tdb = TermDataBase.getInstance(context);
 
-        //Try to display Terms list
+        //Declare views
         recyclerView = view.findViewById(classList);
+
+        //Try to display Course list
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        displayClasses(view, 0);
+        displayClasses();
     }
 
-    private void displayClasses(View view, int termId) {
+    private void displayClasses() {
         //Display a list of items
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         List<String> classText = new ArrayList<>();
-        List<CourseObj> courses = tdb.getCourseByTermId(termId);
         for (CourseObj c : courses) {
             classText.add(c.getId() + ": " + c.getTitle() + " Start: " + dateFormat.format(c.getStartDate())
                     + " End: " + dateFormat.format(c.getEndDate()) + " Status: " + c.getStatus() + "\n");
@@ -100,6 +122,9 @@ public class ClassListFragment extends Fragment implements RecyclerAdapter.ItemC
         });
     }
 
+    /**
+     * ItemClick implementation
+     */
     @Override
     public void onItemClick(View view, int pos) {
         this.selected = adapter.getItem(pos);

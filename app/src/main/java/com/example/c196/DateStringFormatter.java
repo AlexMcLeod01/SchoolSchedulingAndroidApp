@@ -6,8 +6,13 @@ import java.util.Date;
 public class DateStringFormatter {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");;
 
-    public static String formatDateForText(int year, int month, int day) {
-        String formattedDate = new StringBuilder().append(formatMonth(month)).append(" ").append(day).append(" ").append(year).toString();
+    public static String formatDateForText(int year, int month, int day, boolean fromDatabase) {
+        String formattedDate;
+        if (fromDatabase) {
+            formattedDate = new StringBuilder().append(formatMonth(month+1)).append(" ").append(day).append(" ").append(year).toString();
+        } else {
+            formattedDate = new StringBuilder().append(formatMonth(month)).append(" ").append(day).append(" ").append(year).toString();
+        }
         return formattedDate;
     }
 

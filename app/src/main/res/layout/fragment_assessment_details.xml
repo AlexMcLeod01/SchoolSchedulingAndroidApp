@@ -148,19 +148,6 @@
                 app:layout_constraintTop_toBottomOf="@id/assessmentEndLabel" />
 
             <TextView
-                android:id="@+id/assessmentDebugText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="15dp"
-                android:text="Debug Text Will Appear Here"
-                android:textColor="@color/black"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/assessmentTypeSwitch" />
-
-            <TextView
                 android:id="@+id/assessmentTypeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -193,6 +180,41 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/assessmentTypeSwitch"
                 app:layout_constraintTop_toBottomOf="@id/assessmentTypeLabel" />
+
+            <TextView
+                android:id="@+id/assessmentCourseLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="110dp"
+                android:text="Assigned to Class?"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/assessmentPerformanceLabel" />
+
+            <Spinner
+                android:id="@+id/classAssessSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/assessmentCourseLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="20dp"/>
+
+            <TextView
+                android:id="@+id/assessmentCourseText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:layout_marginEnd="110dp"
+                android:text="Not Assigned Yet"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/classAssessSpinner" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -127,7 +127,7 @@ public class TermDetailsFragment extends Fragment {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             start = DateStringFormatter.formatDateForDatabase(year, month, day);
-            startText.setText(formatDateForText(year, month, day));
+            startText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -135,7 +135,7 @@ public class TermDetailsFragment extends Fragment {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             end = DateStringFormatter.formatDateForDatabase(year, month, day);
-            endText.setText(formatDateForText(year, month, day));
+            endText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -212,14 +212,14 @@ public class TermDetailsFragment extends Fragment {
         y = cal.get(Calendar.YEAR);
         m = cal.get(Calendar.MONTH);
         d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d));
+        startText.setText(formatDateForText(y, m-1, d, true));
 
         end = detailedTerm.getEndDate();
         cal.setTime(end);
         y = cal.get(Calendar.YEAR);
         m = cal.get(Calendar.MONTH);
         d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d));
+        endText.setText(formatDateForText(y, m-1, d, true));
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {

@@ -14,9 +14,7 @@ public class CourseObj implements Serializable {
     private Date startDate;
     private Date endDate;
     private String status;
-    private List<CourseInstructor> instructorList;
     private List<AssessmentObj> assessmentList;
-    private List<String> courseNotes;
     private int termId;
 
 
@@ -64,52 +62,12 @@ public class CourseObj implements Serializable {
         this.status = status;
     }
 
-    public List<CourseInstructor> getInstructorList() {
-        return instructorList;
-    }
-
-    public void setInstructorList(List<CourseInstructor> instructorList) {
-        this.instructorList = instructorList;
-    }
-
     public List<AssessmentObj> getAssessmentList() {
         return assessmentList;
     }
 
     public void setAssessmentList(List<AssessmentObj> assessmentList) {
         this.assessmentList = assessmentList;
-    }
-
-    public List<String> getCourseNotes() {
-        return courseNotes;
-    }
-
-    public void setCourseNotes(List<String> courseNotes) {
-        this.courseNotes = courseNotes;
-    }
-
-    public void addInstructor(CourseInstructor instructor) {
-        this.instructorList.add(instructor);
-    }
-
-    public boolean removeInstructor(CourseInstructor instructor) {
-        return this.instructorList.remove(instructor);
-    }
-
-    public void addAssessment(AssessmentObj assess) {
-        this.assessmentList.add(assess);
-    }
-
-    public boolean removeAssessment(AssessmentObj assess) {
-        return this.assessmentList.remove(assess);
-    }
-
-    public void addCourseNote(String note) {
-        this.courseNotes.add(note);
-    }
-
-    public boolean removeCourseNote(String note) {
-        return this.courseNotes.remove(note);
     }
 
     /**
@@ -125,9 +83,7 @@ public class CourseObj implements Serializable {
         setEndDate(end);
         setStatus(status);
         setTermId(0);
-        this.instructorList = new ArrayList<>();
         this.assessmentList = new ArrayList<>();
-        this.courseNotes = new ArrayList<>();
     }
 
     /**
@@ -140,5 +96,20 @@ public class CourseObj implements Serializable {
         setEndDate(new Date());
         setStatus("");
         setTermId(-1);
+    }
+
+    public String toString() {
+        return getId() + ": " + getTitle();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CourseObj) {
+            CourseObj c = (CourseObj) obj;
+            if (this.getId() == c.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

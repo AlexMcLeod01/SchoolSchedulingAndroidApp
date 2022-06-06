@@ -2,21 +2,17 @@ package com.example.c196;
 
 import static com.example.c196.DateStringFormatter.formatDateForText;
 import static com.example.c196.R.id.assessFragmentContainerView;
-import static com.example.c196.R.id.assessmentDebugText;
+import static com.example.c196.R.id.assessmentCourseText;
 import static com.example.c196.R.id.assessmentEndDateSelectorButton;
 import static com.example.c196.R.id.assessmentEndDateText;
 import static com.example.c196.R.id.assessmentStartDateSelectorButton;
 import static com.example.c196.R.id.assessmentStartDateText;
 import static com.example.c196.R.id.assessmentTitleInput;
 import static com.example.c196.R.id.assessmentTypeSwitch;
+import static com.example.c196.R.id.bottomNavView;
+import static com.example.c196.R.id.classAssessSpinner;
 import static com.example.c196.R.id.deleteAssessmentButton;
-import static com.example.c196.R.id.endDateSelectorButton;
-import static com.example.c196.R.id.endDateText;
-import static com.example.c196.R.id.fragmentContainerView;
 import static com.example.c196.R.id.saveAssessmentButton;
-import static com.example.c196.R.id.startDateSelectorButton;
-import static com.example.c196.R.id.startDateText;
-import static com.example.c196.R.id.termTitleInput;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -27,17 +23,23 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.lang.reflect.Array;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,7 +47,7 @@ import java.util.Objects;
  * Use the {@link AssessmentDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AssessmentDetailsFragment extends Fragment {
+public class AssessmentDetailsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     //Instance of database
     private TermDataBase tdb;
 
@@ -56,24 +58,33 @@ public class AssessmentDetailsFragment extends Fragment {
     private Button deleteButton;
     private TextView startText;
     private TextView endText;
+    private TextView courseText;
     private TextInputEditText assessTitle;
     private Switch typeSwitch;
+    private Spinner spinner;
+    private ArrayAdapter<CourseObj> courseAdapter;
 
     //Debug view
     private TextView debugText;
 
     //Instance variables for saving the data
+    private int id;
     private String title;
     private Date start;
     private Date end;
     private boolean isPerformance;
+    private int courseId;
     private AssessmentObj newAssessment;
+    private CourseObj assessmentCourse;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ASSESSMENT_OBJECT_PARAM = "param1";
 
     // An AssessmentObj to show the details of
     private AssessmentObj detailedAssessment;
+
+    //A list of CourseObj to pick from to assign an assessment to
+    private List<CourseObj> courses;
 
     public AssessmentDetailsFragment() {
         // Required empty public constructor
@@ -108,21 +119,13 @@ public class AssessmentDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_assessment_details, container, false);
 
-        //Get the instance of the database
+        //Get the instance of the database and course data
         tdb = TermDataBase.getInstance(root.getContext());
+        courses = tdb.getAllCourses();
 
-        //Declare various views
-        assessTitle = root.findViewById(assessmentTitleInput);
-        startText = root.findViewById(assessmentStartDateText);
-        endText = root.findViewById(assessmentEndDateText);
-        saveButton = root.findViewById(saveAssessmentButton);
-        startDate = root.findViewById(assessmentStartDateSelectorButton);
-        endDate = root.findViewById(assessmentEndDateSelectorButton);
-        deleteButton = root.findViewById(deleteAssessmentButton);
-        typeSwitch = root.findViewById(assessmentTypeSwitch);
+        assignViews(root);
 
-        //Debug text
-        debugText = root.findViewById(assessmentDebugText);
+        setupSpinner();
 
         //Setup different uses of this fragment
         if (detailedAssessment != null) {
@@ -130,16 +133,40 @@ public class AssessmentDetailsFragment extends Fragment {
         } else {
             setupEmptyForm();
         }
-
-
         return root;
+    }
+
+    private void assignViews(View root) {
+        //Declare various views
+        assessTitle = root.findViewById(assessmentTitleInput);
+        startText = root.findViewById(assessmentStartDateText);
+        endText = root.findViewById(assessmentEndDateText);
+        courseText = root.findViewById(assessmentCourseText);
+        saveButton = root.findViewById(saveAssessmentButton);
+        startDate = root.findViewById(assessmentStartDateSelectorButton);
+        endDate = root.findViewById(assessmentEndDateSelectorButton);
+        deleteButton = root.findViewById(deleteAssessmentButton);
+        typeSwitch = root.findViewById(assessmentTypeSwitch);
+        spinner = root.findViewById(classAssessSpinner);
+    }
+
+    /**
+     * A private class didn't work, so implemented OnItemSelectedListener in the overall class
+     * and just set everything else up in this method call
+     */
+    private void setupSpinner() {
+        courseAdapter = new ArrayAdapter<CourseObj>(getContext(),
+                android.R.layout.simple_spinner_item, courses);
+        courseAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(courseAdapter);
+        spinner.setOnItemSelectedListener(this);
     }
 
     DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             start = DateStringFormatter.formatDateForDatabase(year, month, day);
-            startText.setText(formatDateForText(year, month, day));
+            startText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -147,7 +174,7 @@ public class AssessmentDetailsFragment extends Fragment {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             end = DateStringFormatter.formatDateForDatabase(year, month, day);
-            endText.setText(formatDateForText(year, month, day));
+            endText.setText(formatDateForText(year, month, day, false));
         }
     };
 
@@ -170,7 +197,12 @@ public class AssessmentDetailsFragment extends Fragment {
             endText.setText("End Date Required");
             return false;
         }
+        if (assessmentCourse == null) {
+            assessmentCourse = tdb.getCourseById(0);
+            courseId = 0;
+        }
         newAssessment = new AssessmentObj(title, start, end, isPerformance);
+        newAssessment.setCourseId(courseId);
         return true;
     }
 
@@ -212,7 +244,6 @@ public class AssessmentDetailsFragment extends Fragment {
     private void setupSwitch() {
         typeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             isPerformance = b;
-            debugText.setText("Switch is " + b + "\nisPerformance is " + isPerformance);
         });
     }
 
@@ -221,8 +252,10 @@ public class AssessmentDetailsFragment extends Fragment {
      */
     private void fillDetails() {
         int y, m, d;
+        id = detailedAssessment.getId();
 
-        assessTitle.setText(detailedAssessment.getTitle());
+        title = detailedAssessment.getTitle();
+        assessTitle.setText(title);
         assessTitle.setEnabled(false);
         assessTitle.setHint("");
 
@@ -232,19 +265,20 @@ public class AssessmentDetailsFragment extends Fragment {
         y = cal.get(Calendar.YEAR);
         m = cal.get(Calendar.MONTH);
         d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d));
+        startText.setText(formatDateForText(y, m-1, d, true));
 
         end = detailedAssessment.getEndDate();
         cal.setTime(end);
         y = cal.get(Calendar.YEAR);
         m = cal.get(Calendar.MONTH);
         d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d));
+        endText.setText(formatDateForText(y, m-1, d, true));
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
             assessTitle.setHint("e.g. Term 1");
             assessTitle.setEnabled(true);
+            spinner.setEnabled(true);
             setUpDatePickers();
             updatedSaveButton();
         });
@@ -258,15 +292,23 @@ public class AssessmentDetailsFragment extends Fragment {
         });
 
         typeSwitch.setChecked(detailedAssessment.isPerformance());
-
         setupSwitch();
+
+        courseId = detailedAssessment.getCourseId();
+        assessmentCourse = tdb.getCourseById(courseId);
+        spinner.setEnabled(false);
+        if (courseId >= 0) {
+            int pos = courseAdapter.getPosition(assessmentCourse);
+            spinner.setSelection(pos);
+            courseText.setText(assessmentCourse.toString());
+        }
     }
 
     private void updatedSaveButton() {
         saveButton.setText("Save");
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
-                newAssessment.setId(detailedAssessment.getId());
+                newAssessment.setId(id);
                 tdb.updateAssessment(newAssessment);
                 returnToListView();
             }
@@ -274,6 +316,21 @@ public class AssessmentDetailsFragment extends Fragment {
     }
 
     private void returnToListView() {
+        BottomNavigationView bNav = getActivity().findViewById(bottomNavView);
+        bNav.setVisibility(View.VISIBLE);
         getActivity().getSupportFragmentManager().beginTransaction().replace(assessFragmentContainerView, new AssessmentListFragment()).commit();
+    }
+
+    /**
+     * For the OnItemSelectedListener implementation
+     */
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        assessmentCourse = (CourseObj) parent.getItemAtPosition(pos);
+        courseId = assessmentCourse.getId();
+        courseText.setText(assessmentCourse.toString());
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        //Do nothing when nothing selected
     }
 }

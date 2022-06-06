@@ -30,6 +30,7 @@ import com.google.android.material.navigation.NavigationBarView;
 public class Assessments extends AppCompatActivity {
     private Button listButton;
     private Button detailButton;
+    private BottomNavigationView bottomNavigation;
 
     private static AssessmentObj selectedAssessment;
 
@@ -51,7 +52,7 @@ public class Assessments extends AppCompatActivity {
 
 
         //Setup Bottom Navigation Menu
-        BottomNavigationView bottomNavigation = findViewById(bottomNavView);
+        bottomNavigation = findViewById(bottomNavView);
         bottomNavigation.setSelectedItemId(assessmentsButton);
         bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -102,6 +103,7 @@ public class Assessments extends AppCompatActivity {
         Fragment frag = null;
         switch (view.getId()) {
             case assessmentDetailButton:
+                bottomNavigation.setVisibility(View.GONE);
                 if (selectedAssessment == null) {
                     frag = new AssessmentDetailsFragment();
                 } else {

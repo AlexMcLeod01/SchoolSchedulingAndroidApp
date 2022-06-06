@@ -66,6 +66,12 @@ public class AssessmentObj implements Serializable {
         setStartDate(start);
         setEndDate(end);
         setPerformance(perform);
-        setCourseId(-1);
+    }
+
+    @Override
+    public String toString() {
+        String perf = isPerformance() ? "Performance" : "Objective";
+        return "Assessment: " + getTitle() + "\n      Start: " + getStartDate() + "\n      End: "
+            + getEndDate() + "\n      Type: " + perf + "\n";
     }
 }

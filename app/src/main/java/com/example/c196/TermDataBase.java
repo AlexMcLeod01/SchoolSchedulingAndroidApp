@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class TermDataBase extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "terms.db";
-    private static final int VERSION = 5;
+    private static final int VERSION = 6;
 
     private static TermDataBase tdb;
 
@@ -109,6 +109,19 @@ public class TermDataBase extends SQLiteOpenHelper {
                 CourseTable.COURSE_END + " text, " +
                 CourseTable.COURSE_STATUS + " text, " +
                 CourseTable.TERM_ID + " integer references " + TermTable.TABLE + ")");
+
+        //Placeholder Course for unassigned assessments
+        CourseObj noCourse = new CourseObj("Not Yet Assigned", new Date(), new Date(), "Planned");
+        noCourse.setId(0);
+        noCourse.setTermId(0);
+        ContentValues courseValues = new ContentValues();
+        courseValues.put(CourseTable.COURSE_ID, noCourse.getId());
+        courseValues.put(CourseTable.COURSE_TITLE, noCourse.getTitle());
+        courseValues.put(CourseTable.COURSE_START, dateFormat.format(noCourse.getStartDate()));
+        courseValues.put(CourseTable.COURSE_END, dateFormat.format(noCourse.getEndDate()));
+        courseValues.put(CourseTable.COURSE_STATUS, noCourse.getStatus());
+        courseValues.put(CourseTable.TERM_ID, noCourse.getTermId());
+        long cId = db.insert(CourseTable.TABLE, null, courseValues);
 
         //And the supplementary course tables
         db.execSQL("create table " + CourseNotesTable.TABLE + " (" +
@@ -271,6 +284,44 @@ public class TermDataBase extends SQLiteOpenHelper {
      **********************************COURSE TABLE*********************************************
      ******************************************************************************************/
     /**
+     * Getting all the courses
+     * @return List of CourseObj
+     */
+    public List<CourseObj> getAllCourses() {
+        List<CourseObj> courses = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+
+        String orderBy = CourseTable.COURSE_START + " asc";
+
+        String sql = "select * from " + CourseTable.TABLE + " order by " + orderBy;
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String title = cursor.getString(1);
+                Date start;
+                Date end;
+                String status = cursor.getString(4);
+                int termId = cursor.getInt(5);
+                try {
+                    start = date.parse(cursor.getString(2));
+                    end = date.parse(cursor.getString(3));
+                    CourseObj c = new CourseObj(title, start, end, status);
+                    c.setId(id);
+                    c.setTermId(termId);
+                    courses.add(c);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return courses;
+    }
+
+    /**
      * Getting the courses set for the term with term_id id
      * @return List of CourseObj
      */
@@ -349,7 +400,7 @@ public class TermDataBase extends SQLiteOpenHelper {
      * @param course CourseObj
      * @return true if success
      */
-    public boolean addCourse (CourseObj course) {
+    public int addCourse (CourseObj course) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -359,7 +410,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         values.put(CourseTable.COURSE_STATUS, course.getStatus());
         values.put(CourseTable.TERM_ID, course.getTermId());
         long id = db.insert(CourseTable.TABLE, null, values);
-        return id != -1;
+        return (int) id;
     }
 
     /**
@@ -500,6 +551,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         values.put(InstructorTable.INSTRUCTOR_NAME, instructor.getName());
         values.put(InstructorTable.INSTRUCTOR_PHONE, instructor.getPhoneNumber());
         values.put(InstructorTable.INSTRUCTOR_EMAIL, instructor.getEmailAddress());
+        values.put(InstructorTable.COURSE_ID, instructor.getCourseId());
         long id = db.insert(InstructorTable.TABLE, null, values);
         return id != -1;
     }
@@ -539,6 +591,9 @@ public class TermDataBase extends SQLiteOpenHelper {
      * @return true if success
      */
     public boolean addAssessment(AssessmentObj assess) {
+        if (assess.getCourseId() < 0) {
+            assess.setCourseId(0);
+        }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -546,6 +601,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         values.put(AssessmentsTable.ASSESSMENT_START, dateFormat.format(assess.getStartDate()));
         values.put(AssessmentsTable.ASSESSMENT_END, dateFormat.format(assess.getEndDate()));
         values.put(AssessmentsTable.ASSESSMENT_TYPE, assess.isPerformance()? 1: 0);
+        values.put(AssessmentsTable.CLASS_ID, assess.getCourseId());
         long id = db.insert(AssessmentsTable.TABLE, null, values);
         return id != -1;
     }
@@ -633,14 +689,17 @@ public class TermDataBase extends SQLiteOpenHelper {
                 Date start;
                 Date end;
                 boolean perform = cursor.getInt(4) == 1;
+                int courseId = cursor.getInt(5);
                 try {
                     start = date.parse(cursor.getString(2));
                     end = date.parse(cursor.getString(3));
                     assess = new AssessmentObj(title, start, end, perform);
                     assess.setId(id);
+                    assess.setCourseId(courseId);
                 } catch (Exception e) {
                     assess = new AssessmentObj("", new Date (), new Date(), false);
                     assess.setId(-1);
+                    assess.setCourseId(-1);
                     e.printStackTrace();
                 }
             } while (cursor.moveToNext());
@@ -654,8 +713,8 @@ public class TermDataBase extends SQLiteOpenHelper {
      * @param courseId course id
      * @return AssessmentObj
      */
-    public AssessmentObj getAssessmentByCourseId(int courseId) {
-        AssessmentObj assess = null;
+    public List<AssessmentObj> getAssessmentByCourseId(int courseId) {
+        List<AssessmentObj> assessments = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
@@ -664,6 +723,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor.moveToFirst()) {
             do {
+                AssessmentObj assess;
                 int id = cursor.getInt(0);
                 String title = cursor.getString(1);
                 Date start;
@@ -675,14 +735,16 @@ public class TermDataBase extends SQLiteOpenHelper {
                     assess = new AssessmentObj(title, start, end, perform);
                     assess.setId(id);
                     assess.setCourseId(courseId);
+                    assessments.add(assess);
                 } catch (Exception e) {
                     assess = new AssessmentObj("", new Date (), new Date(), false);
                     assess.setId(-1);
                     e.printStackTrace();
                 }
+
             } while (cursor.moveToNext());
         }
         cursor.close();
-        return assess;
+        return assessments;
     }
 }

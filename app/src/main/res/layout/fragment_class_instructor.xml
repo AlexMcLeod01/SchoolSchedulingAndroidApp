@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ClassInstructorFragment">
+
+    <TextView
+        android:id="@+id/classInstructorNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:text="Name of Instructor:"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/classInstructorNameInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorNameLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/classInstructorNameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="eg. Fred Thomplinson"
+            android:textColor="@color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/classInstructorPhoneLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:text="Instructor Phone Number:"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorNameInputLayout" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/classInstructorPhoneInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorPhoneLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/classInstructorPhoneInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="eg. 555-555-5555"
+            android:textColor="@color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/classInstructorEmailLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:text="Instructor Email Address:"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorPhoneInputLayout" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/classInstructorEmailInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorEmailLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/classInstructorEmailInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="eg. simpson.aj@blonicrules.com"
+            android:textColor="@color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/saveInstructorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        app:layout_constraintTop_toBottomOf="@+id/classInstructorEmailInputLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="15dp"/>
+
+    <Button
+        android:id="@+id/cancelInstructorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        app:layout_constraintTop_toBottomOf="@+id/classInstructorEmailInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="15dp"/>
+
+    <Button
+        android:id="@+id/deleteInstructorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="Delete"
+        android:visibility="gone"
+        app:backgroundTint="#D11414"
+        app:layout_constraintEnd_toStartOf="@id/saveInstructorButton"
+        app:layout_constraintStart_toEndOf="@id/cancelInstructorButton"
+        app:layout_constraintTop_toBottomOf="@id/classInstructorEmailInputLayout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

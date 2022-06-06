@@ -80,4 +80,8 @@ public class TermObj implements Serializable {
         setEndDate(end);
         this.courses = new ArrayList<>();
     }
+
+    public String toString() {
+        return getId() + ": " + getTitle();
+    }
 }

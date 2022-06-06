@@ -1,9 +1,11 @@
 package com.example.c196;
 
+import java.io.Serializable;
+
 /**
  * CourseInstructor Object to help CourseObj
  */
-public class CourseInstructor {
+public class CourseInstructor implements Serializable {
     private int id;
     private String name;
     private String phoneNumber;
@@ -61,5 +63,10 @@ public class CourseInstructor {
         setName(name);
         setPhoneNumber(phone);
         setEmailAddress(email);
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

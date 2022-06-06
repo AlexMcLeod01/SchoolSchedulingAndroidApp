@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="class_status_array">
+        <item>In-Progress</item>
+        <item>Completed</item>
+        <item>Dropped</item>
+        <item>Planned</item>
+    </string-array>
+</resources>

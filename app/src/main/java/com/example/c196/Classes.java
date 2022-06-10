@@ -2,6 +2,7 @@ package com.example.c196;
 
 import static com.example.c196.R.id.assessFragmentContainerView;
 import static com.example.c196.R.id.assessmentDetailButton;
+import static com.example.c196.R.id.assessmentFromClassButton;
 import static com.example.c196.R.id.assessmentListButton;
 import static com.example.c196.R.id.assessmentsButton;
 import static com.example.c196.R.id.bottomNavView;
@@ -10,16 +11,20 @@ import static com.example.c196.R.id.classFragmentContainerView;
 import static com.example.c196.R.id.classListButton;
 import static com.example.c196.R.id.classesButton;
 import static com.example.c196.R.id.homeButton;
+import static com.example.c196.R.id.homeFromClassButton;
+import static com.example.c196.R.id.termFromClassButton;
 import static com.example.c196.R.id.termSelectionSpinner;
 import static com.example.c196.R.id.termsButton;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,8 +42,15 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
     //views
     private Button listButton;
     private Button detailButton;
-    private BottomNavigationView bottomNavigation;
     private Spinner termSpinner;
+
+    //Nav for portrait
+    private BottomNavigationView bottomNavigation;
+
+    //Nav for landscape
+    private Button landHomeButton;
+    private Button landTermButton;
+    private Button landAssessButton;
 
     private TermDataBase tdb;
 
@@ -57,10 +69,7 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
         terms = tdb.getTerms();
         courses = tdb.getCourseByTermId(0);
 
-        //Views initialize
-        listButton = findViewById(classListButton);
-        detailButton = findViewById(classDetailButton);
-        termSpinner = findViewById(termSelectionSpinner);
+        initViews();
 
         //Set Term List as first fragment
         FragmentManager manager = getSupportFragmentManager();
@@ -74,6 +83,28 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
         addButtonListeners();
         setupSpinner();
 
+        initNavs();
+    }
+
+    private void initViews() {
+        //Views initialize
+        listButton = findViewById(classListButton);
+        detailButton = findViewById(classDetailButton);
+        termSpinner = findViewById(termSelectionSpinner);
+    }
+
+    private void initNavs() {
+        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            initPortraitNav();
+        } else {
+            initLandscapeNav();
+        }
+    }
+
+    private void initPortraitNav() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.show();
         //Setup Bottom Navigation Menu
         bottomNavigation = findViewById(bottomNavView);
         bottomNavigation.setSelectedItemId(classesButton);
@@ -99,6 +130,39 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
                 return false;
             }
         });
+    }
+
+    private void initLandscapeNav() {
+        getSupportActionBar().hide();
+        landHomeButton = findViewById(homeFromClassButton);
+        landTermButton = findViewById(termFromClassButton);
+        landAssessButton = findViewById(assessmentFromClassButton);
+
+        landHomeButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            overridePendingTransition(0,0);
+        });
+
+        landTermButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), Terms.class));
+            overridePendingTransition(0,0);
+        });
+
+        landAssessButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), Assessments.class));
+            overridePendingTransition(0,0);
+        });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        ActionBar actionBar = getSupportActionBar();
+        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.show();
+        } else {
+            actionBar.hide();
+        }
     }
 
     private void setupSpinner() {
@@ -133,7 +197,7 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
         switch (view.getId()) {
             case classDetailButton:
                 termSpinner.setVisibility(View.GONE);
-                bottomNavigation.setVisibility(View.GONE);
+                setBottomNavVisible(View.GONE);
                 if (selected == null) {
                     frag = new ClassDetailsFragment();
                 } else {
@@ -143,11 +207,17 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
                 break;
             case classListButton:
                 termSpinner.setVisibility(View.VISIBLE);
-                bottomNavigation.setVisibility(View.VISIBLE);
+                setBottomNavVisible(View.VISIBLE);
                 frag = ClassListFragment.newInstance(courses);
                 break;
         }
         setFragment(frag);
+    }
+
+    private void setBottomNavVisible(int visible) {
+        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigation.setVisibility(visible);
+        }
     }
 
     /**
@@ -172,7 +242,7 @@ public class Classes extends AppCompatActivity implements AdapterView.OnItemSele
         int termId = term.getId();
         courses = tdb.getCourseByTermId(termId);
         termSpinner.setVisibility(View.VISIBLE);
-        bottomNavigation.setVisibility(View.VISIBLE);
+        setBottomNavVisible(View.VISIBLE);
         Fragment frag = ClassListFragment.newInstance(courses);
         setFragment(frag);
     }

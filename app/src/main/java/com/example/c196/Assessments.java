@@ -98,6 +98,7 @@ public class Assessments extends AppCompatActivity {
     }
 
     private void setupLandscapeNav() {
+        getSupportActionBar().hide();
         landHomeButton = findViewById(homeFromAssessButton);
         landTermButton = findViewById(termFromAssessButton);
         landClassButton = findViewById(classFromAssessButton);
@@ -118,10 +119,11 @@ public class Assessments extends AppCompatActivity {
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        ActionBar actionBar = getSupportActionBar();
         if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
-
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.show();
         } else {
-            ActionBar actionBar = getSupportActionBar();
             actionBar.hide();
         }
     }

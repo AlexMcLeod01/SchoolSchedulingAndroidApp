@@ -11,25 +11,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Classes"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintBottom_toTopOf="@id/homeFromClassButton"
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.02" />
+        android:layout_marginTop="25dp"
+        app:layout_goneMarginTop="25dp" />
 
     <Spinner
         android:id="@+id/termSelectionSpinner"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="25dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/classTitle"
+        app:layout_constraintStart_toEndOf="@id/classTitle"
+        app:layout_constraintTop_toTopOf="parent"
         android:visibility="visible"/>
 
     <androidx.fragment.app.FragmentContainerView
@@ -38,50 +38,76 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:layout_constraintBottom_toTopOf="@id/classDetailButton"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/classDetailButton"
         app:layout_constraintTop_toBottomOf="@id/termSelectionSpinner"
         android:layout_marginTop="10dp"/>
 
     <Button
-        android:id="@+id/classDetailButton"
-        android:layout_width="130dp"
-        android:layout_height="70dp"
+        android:id="@+id/homeFromClassButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="30dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:text="Course Details"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/classFragmentContainerView"
+        android:layout_marginTop="10dp"
+        android:text="Home"
+        app:layout_constraintBottom_toTopOf="@id/termFromClassButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/termFromClassButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Terms"
+        app:layout_constraintBottom_toTopOf="@id/assessmentFromClassButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/assessmentFromClassButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Assessments"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toTopOf="@id/classListButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/classListButton"
-        android:layout_width="130dp"
-        android:layout_height="70dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
         android:text="Course List"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavView"
+        app:layout_constraintBottom_toTopOf="@id/classDetailButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/classFragmentContainerView"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
+        />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavView"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        app:itemIconSize="70dp"
+    <Button
+        android:id="@+id/classDetailButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Course Details"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:itemIconTint="@drawable/bottom_nav_selector"
-        app:itemTextColor="@drawable/bottom_nav_selector"
-        app:menu="@menu/bottom_nav_menu" />
+        app:layout_constraintEnd_toStartOf="@id/classFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

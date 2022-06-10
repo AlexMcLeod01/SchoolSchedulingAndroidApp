@@ -1,9 +1,15 @@
 package com.example.c196;
 
 import static com.example.c196.DateStringFormatter.formatDateForText;
+import static com.example.c196.R.id.addCourseButton;
+import static com.example.c196.R.id.courseSelectorSpinner;
+import static com.example.c196.R.id.coursesLabel;
+import static com.example.c196.R.id.coursesText;
 import static com.example.c196.R.id.endDateSelectorButton;
 import static com.example.c196.R.id.endDateText;
+import static com.example.c196.R.id.errorText;
 import static com.example.c196.R.id.fragmentContainerView;
+import static com.example.c196.R.id.removeCourseButton;
 import static com.example.c196.R.id.startDateSelectorButton;
 import static com.example.c196.R.id.startDateText;
 import static com.example.c196.R.id.termTitleInput;
@@ -17,8 +23,10 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -28,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -44,18 +53,28 @@ public class TermDetailsFragment extends Fragment {
     private Button endDate;
     private Button saveButton;
     private Button deleteButton;
+    private Button addCourse;
+    private Button removeCourse;
+
+    private TextView errorLabel;
     private TextView startText;
     private TextView endText;
+    private TextView courseLabel;
+    private TextView courseListText;
+
     private TextInputEditText termTitle;
 
-    //Debug view
-    private TextView debugText;
+    private Spinner courseSpinner;
 
     //Instance variables for saving the data
     private String title;
     private Date start;
     private Date end;
     private TermObj newTerm;
+
+    //Course List to initialize Spinner
+    private List<CourseObj> courses;
+    private ArrayAdapter<CourseObj> adapter;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TERM_OBJECT_PARAM = "param1";
@@ -99,18 +118,11 @@ public class TermDetailsFragment extends Fragment {
 
         //Get the instance of the database
         tdb = TermDataBase.getInstance(root.getContext());
+        courses = tdb.getAllCourses();
 
-        //Declare various views
-        termTitle = root.findViewById(termTitleInput);
-        startText = root.findViewById(startDateText);
-        endText = root.findViewById(endDateText);
-        saveButton = root.findViewById(R.id.saveButton);
-        startDate = root.findViewById(startDateSelectorButton);
-        endDate = root.findViewById(endDateSelectorButton);
-        deleteButton = root.findViewById(R.id.deleteButton);
-
-        //Debug text
-        debugText = root.findViewById(R.id.debugText);
+        declareViews(root);
+        setupSpinner();
+        setupButtons();
 
         //Setup different uses of this fragment
         if (detailedTerm != null) {
@@ -121,6 +133,48 @@ public class TermDetailsFragment extends Fragment {
 
 
         return root;
+    }
+
+    private void declareViews(View root) {
+        //Declare various views
+        errorLabel = root.findViewById(errorText);
+        termTitle = root.findViewById(termTitleInput);
+        startText = root.findViewById(startDateText);
+        endText = root.findViewById(endDateText);
+        saveButton = root.findViewById(R.id.saveButton);
+        startDate = root.findViewById(startDateSelectorButton);
+        endDate = root.findViewById(endDateSelectorButton);
+        deleteButton = root.findViewById(R.id.deleteButton);
+        addCourse = root.findViewById(addCourseButton);
+        removeCourse = root.findViewById(removeCourseButton);
+        courseLabel = root.findViewById(coursesLabel);
+        courseListText = root.findViewById(coursesText);
+        courseSpinner = root.findViewById(courseSelectorSpinner);
+    }
+
+    private void setupSpinner() {
+        adapter = new ArrayAdapter<CourseObj>(getContext(),
+                android.R.layout.simple_spinner_item, courses);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        courseSpinner.setAdapter(adapter);
+    }
+
+    private void setupButtons() {
+        addCourse.setOnClickListener(v -> {
+            CourseObj c = (CourseObj) courseSpinner.getSelectedItem();
+            c.setTermId(detailedTerm.getId());
+            tdb.updateCourse(c);
+            setCourseListText();
+        });
+
+        removeCourse.setOnClickListener(v -> {
+            CourseObj c = (CourseObj) courseSpinner.getSelectedItem();
+            if (c.getTermId() == detailedTerm.getId()) {
+                c.setTermId(0);
+                tdb.updateCourse(c);
+                setCourseListText();
+            }
+        });
     }
 
     DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -156,6 +210,10 @@ public class TermDetailsFragment extends Fragment {
         }
         if ((endText.getText().toString().equals("No End Date Set") || endText.getText().toString().equals("End Date Required")) || end == null) {
             endText.setText("End Date Required");
+            return false;
+        }
+        if (start.after(end)) {
+            endText.setText("End Date Must Be After Start Date");
             return false;
         }
         newTerm = new TermObj(title, start, end);
@@ -207,19 +265,10 @@ public class TermDetailsFragment extends Fragment {
         termTitle.setHint("");
 
         start = detailedTerm.getStartDate();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(start);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d, true));
+        startText.setText(DateStringFormatter.getText(start, true));
 
         end = detailedTerm.getEndDate();
-        cal.setTime(end);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d, true));
+        endText.setText(DateStringFormatter.getText(end, true));
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
@@ -235,9 +284,25 @@ public class TermDetailsFragment extends Fragment {
                 tdb.deleteTerm(detailedTerm);
                 returnToListView();
             } else {
-                //TODO error message
+                errorLabel.setVisibility(View.VISIBLE);
             }
         });
+
+        courseLabel.setVisibility(View.VISIBLE);
+        courseListText.setVisibility(View.VISIBLE);
+        courseSpinner.setVisibility(View.VISIBLE);
+        addCourse.setVisibility(View.VISIBLE);
+        removeCourse.setVisibility(View.VISIBLE);
+        setCourseListText();
+    }
+
+    private void setCourseListText() {
+        List<CourseObj> courseList = tdb.getCourseByTermId(detailedTerm.getId());
+        StringBuilder courseText = new StringBuilder();
+        for (CourseObj c : courseList) {
+            courseText.append(c.getId()).append(": ").append(c.getTitle()).append(" ").append(c.getStartDate()).append("\n");
+        }
+        courseListText.setText(courseText.toString());
     }
 
     private void updatedSaveButton() {

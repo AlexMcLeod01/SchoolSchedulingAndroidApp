@@ -5,20 +5,22 @@ import static com.example.c196.R.id.assessmentDetailButton;
 import static com.example.c196.R.id.assessmentListButton;
 import static com.example.c196.R.id.assessmentsButton;
 import static com.example.c196.R.id.bottomNavView;
+import static com.example.c196.R.id.classFromAssessButton;
 import static com.example.c196.R.id.classesButton;
-import static com.example.c196.R.id.fragmentContainerView;
 import static com.example.c196.R.id.homeButton;
-import static com.example.c196.R.id.termDetailButton;
-import static com.example.c196.R.id.termListButton;
+import static com.example.c196.R.id.homeFromAssessButton;
+import static com.example.c196.R.id.termFromAssessButton;
 import static com.example.c196.R.id.termsButton;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,9 +30,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
 public class Assessments extends AppCompatActivity {
+    //Buttons for both portrait and landscape
     private Button listButton;
     private Button detailButton;
+
+    //Nav for portrait
     private BottomNavigationView bottomNavigation;
+
+    //Nav for landscape
+    private Button landHomeButton;
+    private Button landTermButton;
+    private Button landClassButton;
 
     private static AssessmentObj selectedAssessment;
 
@@ -51,6 +61,15 @@ public class Assessments extends AppCompatActivity {
         addButtonListeners();
 
 
+        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            setupPortraitNav();
+        } else {
+            setupLandscapeNav();
+        }
+    }
+
+    private void setupPortraitNav() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //Setup Bottom Navigation Menu
         bottomNavigation = findViewById(bottomNavView);
         bottomNavigation.setSelectedItemId(assessmentsButton);
@@ -78,6 +97,35 @@ public class Assessments extends AppCompatActivity {
         });
     }
 
+    private void setupLandscapeNav() {
+        landHomeButton = findViewById(homeFromAssessButton);
+        landTermButton = findViewById(termFromAssessButton);
+        landClassButton = findViewById(classFromAssessButton);
+
+        landHomeButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            overridePendingTransition(0,0);
+        });
+        landTermButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), Terms.class));
+            overridePendingTransition(0,0);
+        });
+        landClassButton.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), Classes.class));
+            overridePendingTransition(0,0);
+        });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+
+        } else {
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.hide();
+        }
+    }
+
     /**
      * A listener to cause the buttons to call switch_fragment
      */
@@ -103,7 +151,9 @@ public class Assessments extends AppCompatActivity {
         Fragment frag = null;
         switch (view.getId()) {
             case assessmentDetailButton:
-                bottomNavigation.setVisibility(View.GONE);
+                if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                    bottomNavigation.setVisibility(View.GONE);
+                }
                 if (selectedAssessment == null) {
                     frag = new AssessmentDetailsFragment();
                 } else {
@@ -112,7 +162,9 @@ public class Assessments extends AppCompatActivity {
                 }
                 break;
             case assessmentListButton:
-
+                if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                    bottomNavigation.setVisibility(View.VISIBLE);
+                }
                 frag = new AssessmentListFragment();
                 break;
         }

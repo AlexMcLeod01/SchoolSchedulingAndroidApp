@@ -1,18 +1,24 @@
 package com.example.c196;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DateStringFormatter {
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");;
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    public static String getText(Date date, boolean fromDatabase) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        int y = cal.get(Calendar.YEAR);
+        int m = cal.get(Calendar.MONTH);
+        int d = cal.get(Calendar.DAY_OF_MONTH);
+        return formatDateForText(y, m, d, fromDatabase);
+    }
 
     public static String formatDateForText(int year, int month, int day, boolean fromDatabase) {
-        String formattedDate;
-        if (fromDatabase) {
-            formattedDate = new StringBuilder().append(formatMonth(month+1)).append(" ").append(day).append(" ").append(year).toString();
-        } else {
-            formattedDate = new StringBuilder().append(formatMonth(month)).append(" ").append(day).append(" ").append(year).toString();
-        }
+        String formattedDate = new StringBuilder().append(formatMonth(month)).append(" ").append(day).append(" ").append(year).toString();
         return formattedDate;
     }
 

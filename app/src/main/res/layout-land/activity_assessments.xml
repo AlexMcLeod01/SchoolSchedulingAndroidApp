@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Assessments">
+
+    <TextView
+        android:id="@+id/assessmentTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Assessments"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/homeFromAssessButton"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="25dp"
+        app:layout_goneMarginTop="25dp"/>
+
+    <Button
+        android:id="@+id/homeFromAssessButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Home"
+        app:layout_constraintBottom_toTopOf="@id/termFromAssessButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/termFromAssessButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Terms"
+        app:layout_constraintBottom_toTopOf="@id/classFromAssessButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/classFromAssessButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Classes"
+        app:layout_constraintBottom_toTopOf="@id/assessmentListButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/assessmentListButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Assessment List"
+        app:layout_constraintBottom_toTopOf="@id/assessmentDetailButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/assessmentDetailButton"
+        android:layout_width="140dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Assessment Details"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/assessFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/assessFragmentContainerView"
+        android:name="com.example.c196.AssessmentListFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/assessmentDetailButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

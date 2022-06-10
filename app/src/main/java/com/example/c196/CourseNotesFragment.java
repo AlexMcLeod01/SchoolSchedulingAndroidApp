@@ -1,7 +1,9 @@
 package com.example.c196;
 
 import static com.example.c196.R.id.classFragmentContainerView;
+import static com.example.c196.R.id.sendNoteButton;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -22,8 +24,11 @@ public class CourseNotesFragment extends Fragment {
     //Declare Views
     private Button save;
     private Button delete;
+    private Button send;
+
     private TextInputEditText noteInput;
 
+    //Database
     private TermDataBase tdb;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -84,6 +89,7 @@ public class CourseNotesFragment extends Fragment {
 
         save = root.findViewById(R.id.saveNoteButton);
         delete = root.findViewById(R.id.deleteNoteButton);
+        send = root.findViewById(sendNoteButton);
         noteInput = root.findViewById(R.id.noteInput);
 
         if (note == null) {
@@ -118,6 +124,16 @@ public class CourseNotesFragment extends Fragment {
             });
             noteInput.setEnabled(true);
         });
+        delete.setVisibility(View.VISIBLE);
+        delete.setOnClickListener(v -> {
+            tdb.deleteNote(note);
+            returnToDetails();
+        });
+        send.setVisibility(View.VISIBLE);
+        send.setOnClickListener(v -> {
+            sendEMail();
+            returnToDetails();
+        });
     }
 
     private boolean validate() {
@@ -127,6 +143,15 @@ public class CourseNotesFragment extends Fragment {
         String noteText = noteInput.getText().toString();
         newNote = new CourseNoteObj(noteText, course.getId());
         return true;
+    }
+
+    private void sendEMail() {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_SUBJECT, course.getTitle() + " Note");
+        i.putExtra(Intent.EXTRA_TEXT, note.getNote());
+
+        startActivity(Intent.createChooser(i, "Select App To Continue"));
     }
 
     private void returnToDetails() {

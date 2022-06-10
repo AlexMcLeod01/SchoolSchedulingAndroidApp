@@ -229,6 +229,10 @@ public class ClassDetailsFragment extends Fragment implements AdapterView.OnItem
             endText.setText("End Date Required");
             return false;
         }
+        if (start.after(end)) {
+            endText.setText("End Date Must Be After Start Date");
+            return false;
+        }
         newCourse = new CourseObj(title, start, end, status);
         if(detailedClass != null) {
             if(detailedClass.getId() >= 0) {
@@ -333,22 +337,11 @@ public class ClassDetailsFragment extends Fragment implements AdapterView.OnItem
     }
 
     private void fillCalendars() {
-        int y, m, d;
-
         start = detailedClass.getStartDate();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(start);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d, true));
+        startText.setText(DateStringFormatter.getText(start, true));
 
         end = detailedClass.getEndDate();
-        cal.setTime(end);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d, true));
+        endText.setText(DateStringFormatter.getText(end, true));
     }
 
     private void fillTextBoxes() {

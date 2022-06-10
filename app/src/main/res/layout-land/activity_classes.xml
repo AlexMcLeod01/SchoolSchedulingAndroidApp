@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Classes">
+
+    <TextView
+        android:id="@+id/classTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Classes"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.02" />
+
+    <Spinner
+        android:id="@+id/termSelectionSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classTitle"
+        android:visibility="visible"/>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/classFragmentContainerView"
+        android:name="com.example.c196.AssessmentListFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@id/classDetailButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/termSelectionSpinner"
+        android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/classDetailButton"
+        android:layout_width="130dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="Course Details"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/classListButton"
+        android:layout_width="130dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="Course List"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/classFragmentContainerView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavView"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        app:itemIconSize="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:itemIconTint="@drawable/bottom_nav_selector"
+        app:itemTextColor="@drawable/bottom_nav_selector"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -197,6 +197,10 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
             endText.setText("End Date Required");
             return false;
         }
+        if (start.after(end)) {
+            endText.setText("End Date Must Be After Start Date");
+            return false;
+        }
         if (assessmentCourse == null) {
             assessmentCourse = tdb.getCourseById(0);
             courseId = 0;
@@ -251,7 +255,6 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
      * Fills in details when launched with a selected Term
      */
     private void fillDetails() {
-        int y, m, d;
         id = detailedAssessment.getId();
 
         title = detailedAssessment.getTitle();
@@ -260,19 +263,10 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         assessTitle.setHint("");
 
         start = detailedAssessment.getStartDate();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(start);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        startText.setText(formatDateForText(y, m-1, d, true));
+        startText.setText(DateStringFormatter.getText(start, true));
 
         end = detailedAssessment.getEndDate();
-        cal.setTime(end);
-        y = cal.get(Calendar.YEAR);
-        m = cal.get(Calendar.MONTH);
-        d = cal.get(Calendar.DAY_OF_MONTH);
-        endText.setText(formatDateForText(y, m-1, d, true));
+        endText.setText(DateStringFormatter.getText(end, true));
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
@@ -291,7 +285,8 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
             }
         });
 
-        typeSwitch.setChecked(detailedAssessment.isPerformance());
+        isPerformance = detailedAssessment.isPerformance();
+        typeSwitch.setChecked(isPerformance);
         setupSwitch();
 
         courseId = detailedAssessment.getCourseId();

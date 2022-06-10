@@ -594,7 +594,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         if (assess.getCourseId() < 0) {
             assess.setCourseId(0);
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd ");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(AssessmentsTable.ASSESSMENT_TITLE, assess.getTitle());
@@ -615,6 +615,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateTime = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
 
         String orderBy = AssessmentsTable.ASSESSMENT_START + " asc";
 
@@ -622,19 +623,29 @@ public class TermDataBase extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor.moveToFirst()) {
             do {
+                AssessmentObj a;
                 int id = cursor.getInt(0);
                 String title = cursor.getString(1);
                 Date start;
                 Date end;
                 boolean perform = (cursor.getInt(4) == 1);
                 try {
-                    start = date.parse(cursor.getString(2));
-                    end = date.parse(cursor.getString(3));
-                    AssessmentObj a = new AssessmentObj(title, start, end, perform);
+                    start = dateTime.parse(cursor.getString(2));
+                    end = dateTime.parse(cursor.getString(3));
+                    a = new AssessmentObj(title, start, end, perform);
                     a.setId(id);
                     assessments.add(a);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    try {
+                        e.printStackTrace();
+                        start = date.parse(cursor.getString(2));
+                        end = date.parse(cursor.getString(3));
+                        a = new AssessmentObj(title, start, end, perform);
+                        a.setId(id);
+                        assessments.add(a);
+                    } catch (Exception e0) {
+                        e0.printStackTrace();
+                    }
                 }
             } while (cursor.moveToNext());
         }
@@ -657,7 +668,7 @@ public class TermDataBase extends SQLiteOpenHelper {
      * @param assess AssessmentObj
      */
     public void updateAssessment(AssessmentObj assess) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(AssessmentsTable.ASSESSMENT_TITLE, assess.getTitle());
@@ -679,6 +690,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateTime = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
 
         String sql = "select * from " + AssessmentsTable.TABLE + " where " + AssessmentsTable.ASSESSMENT_ID + "= " + id;
         Cursor cursor = db.rawQuery(sql, null);
@@ -691,16 +703,24 @@ public class TermDataBase extends SQLiteOpenHelper {
                 boolean perform = cursor.getInt(4) == 1;
                 int courseId = cursor.getInt(5);
                 try {
-                    start = date.parse(cursor.getString(2));
-                    end = date.parse(cursor.getString(3));
+                    start = dateTime.parse(cursor.getString(2));
+                    end = dateTime.parse(cursor.getString(3));
                     assess = new AssessmentObj(title, start, end, perform);
                     assess.setId(id);
                     assess.setCourseId(courseId);
                 } catch (Exception e) {
-                    assess = new AssessmentObj("", new Date (), new Date(), false);
-                    assess.setId(-1);
-                    assess.setCourseId(-1);
-                    e.printStackTrace();
+                    try {
+                        start = date.parse(cursor.getString(2));
+                        end = date.parse(cursor.getString(3));
+                        assess = new AssessmentObj(title, start, end, perform);
+                        assess.setId(id);
+                        assess.setCourseId(courseId);
+                    } catch (Exception e0) {
+                        assess = new AssessmentObj("", new Date (), new Date(), false);
+                        assess.setId(-1);
+                        assess.setCourseId(-1);
+                        e0.printStackTrace();
+                    }
                 }
             } while (cursor.moveToNext());
         }
@@ -718,6 +738,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateTime = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
 
         String sql = "select * from " + AssessmentsTable.TABLE + " where " + AssessmentsTable.CLASS_ID + "= " + courseId;
         Cursor cursor = db.rawQuery(sql, null);
@@ -730,16 +751,24 @@ public class TermDataBase extends SQLiteOpenHelper {
                 Date end;
                 boolean perform = cursor.getInt(4) == 1;
                 try {
-                    start = date.parse(cursor.getString(2));
-                    end = date.parse(cursor.getString(3));
+                    start = dateTime.parse(cursor.getString(2));
+                    end = dateTime.parse(cursor.getString(3));
                     assess = new AssessmentObj(title, start, end, perform);
                     assess.setId(id);
                     assess.setCourseId(courseId);
                     assessments.add(assess);
                 } catch (Exception e) {
-                    assess = new AssessmentObj("", new Date (), new Date(), false);
-                    assess.setId(-1);
-                    e.printStackTrace();
+                    try {
+                        start = date.parse(cursor.getString(2));
+                        end = date.parse(cursor.getString(3));
+                        assess = new AssessmentObj(title, start, end, perform);
+                        assess.setId(id);
+                        assess.setCourseId(courseId);
+                    } catch (Exception e0) {
+                        assess = new AssessmentObj("", new Date (), new Date(), false);
+                        assess.setId(-1);
+                        e0.printStackTrace();
+                    }
                 }
 
             } while (cursor.moveToNext());

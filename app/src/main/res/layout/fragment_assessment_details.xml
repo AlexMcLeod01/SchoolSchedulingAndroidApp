@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 android:text="No Start Date Set"
@@ -113,6 +113,30 @@
                 app:layout_constraintTop_toBottomOf="@id/assessmentStartLabel" />
 
             <TextView
+                android:id="@+id/assessmentStartTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
+                android:text="No Start Time Set"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/assessmentStartDateText" />
+
+            <Button
+                android:id="@+id/assessmentStartTimeSelectorButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:text="Set Start Time"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/assessmentStartTimeText"
+                app:layout_constraintTop_toBottomOf="@id/assessmentStartDateSelectorButton" />
+
+            <TextView
                 android:id="@+id/assessmentEndLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -121,14 +145,14 @@
                 android:text="End of Assessment:"
                 android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/assessmentStartDateText" />
+                app:layout_constraintTop_toBottomOf="@id/assessmentStartTimeText" />
 
             <TextView
                 android:id="@+id/assessmentEndDateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 android:text="No End Date Set"
@@ -148,14 +172,39 @@
                 app:layout_constraintTop_toBottomOf="@id/assessmentEndLabel" />
 
             <TextView
+                android:id="@+id/assessmentEndTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
+                android:text="No End Time Set"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/assessmentEndDateText" />
+
+            <Button
+                android:id="@+id/assessmentEndTimeSelectorButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:text="Set End Time"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/assessmentEndTimeText"
+                app:layout_constraintTop_toBottomOf="@id/assessmentEndDateSelectorButton" />
+
+            <TextView
                 android:id="@+id/assessmentTypeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
                 android:text="Type of Assessment:"
                 android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/assessmentEndDateSelectorButton" />
+                app:layout_constraintTop_toBottomOf="@id/assessmentEndTimeSelectorButton" />
 
             <Switch
                 android:id="@+id/assessmentTypeSwitch"

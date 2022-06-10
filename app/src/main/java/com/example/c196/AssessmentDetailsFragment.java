@@ -5,8 +5,12 @@ import static com.example.c196.R.id.assessFragmentContainerView;
 import static com.example.c196.R.id.assessmentCourseText;
 import static com.example.c196.R.id.assessmentEndDateSelectorButton;
 import static com.example.c196.R.id.assessmentEndDateText;
+import static com.example.c196.R.id.assessmentEndTimeSelectorButton;
+import static com.example.c196.R.id.assessmentEndTimeText;
 import static com.example.c196.R.id.assessmentStartDateSelectorButton;
 import static com.example.c196.R.id.assessmentStartDateText;
+import static com.example.c196.R.id.assessmentStartTimeSelectorButton;
+import static com.example.c196.R.id.assessmentStartTimeText;
 import static com.example.c196.R.id.assessmentTitleInput;
 import static com.example.c196.R.id.assessmentTypeSwitch;
 import static com.example.c196.R.id.bottomNavView;
@@ -15,6 +19,7 @@ import static com.example.c196.R.id.deleteAssessmentButton;
 import static com.example.c196.R.id.saveAssessmentButton;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -26,19 +31,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.lang.reflect.Array;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,9 +58,13 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
     private Button endDate;
     private Button saveButton;
     private Button deleteButton;
+    private Button startTime;
+    private Button endTime;
     private TextView startText;
     private TextView endText;
     private TextView courseText;
+    private TextView startTimeText;
+    private TextView endTimeText;
     private TextInputEditText assessTitle;
     private Switch typeSwitch;
     private Spinner spinner;
@@ -70,7 +76,11 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
     //Instance variables for saving the data
     private int id;
     private String title;
+    private String sDate;
+    private String sTime;
     private Date start;
+    private String eDate;
+    private String eTime;
     private Date end;
     private boolean isPerformance;
     private int courseId;
@@ -148,6 +158,10 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         deleteButton = root.findViewById(deleteAssessmentButton);
         typeSwitch = root.findViewById(assessmentTypeSwitch);
         spinner = root.findViewById(classAssessSpinner);
+        startTimeText = root.findViewById(assessmentStartTimeText);
+        startTime = root.findViewById(assessmentStartTimeSelectorButton);
+        endTimeText = root.findViewById(assessmentEndTimeText);
+        endTime = root.findViewById(assessmentEndTimeSelectorButton);
     }
 
     /**
@@ -165,16 +179,32 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
     DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-            start = DateStringFormatter.formatDateForDatabase(year, month, day);
-            startText.setText(formatDateForText(year, month, day, false));
+            sDate = formatDateForText(year, month, day, false);
+            startText.setText(sDate);
+        }
+    };
+
+    TimePickerDialog.OnTimeSetListener timeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            sTime = DateStringFormatter.formatTimeForText(i, i1);
+            startTimeText.setText(sTime);
         }
     };
 
     DatePickerDialog.OnDateSetListener endDateSetListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-            end = DateStringFormatter.formatDateForDatabase(year, month, day);
-            endText.setText(formatDateForText(year, month, day, false));
+            eDate = formatDateForText(year, month, day, false);
+            endText.setText(eDate);
+        }
+    };
+
+    TimePickerDialog.OnTimeSetListener endTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker timePicker, int i, int i1) {
+            eTime = DateStringFormatter.formatTimeForText(i, i1);
+            endTimeText.setText(eTime);
         }
     };
 
@@ -189,14 +219,24 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         } else {
             title = Objects.requireNonNull(assessTitle.getText()).toString();
         }
-        if ((startText.getText().toString().equals("No Start Date Set") || startText.getText().toString().equals("Start Date Required")) || start == null) {
+        if ((sDate.equals("No Start Date Set") || sDate.equals("Start Date Required")) || sDate == null) {
             startText.setText("Start Date Required");
             return false;
         }
-        if ((endText.getText().toString().equals("No End Date Set") || endText.getText().toString().equals("End Date Required")) || end == null) {
+        if ((sTime.equals("No Start Time Set") || sTime.equals("Start Time Required")) || sTime == null) {
+            startTimeText.setText("Start Time Required");
+            return false;
+        }
+        start = DateStringFormatter.formatDateTimeForDatabase(sDate, sTime);
+        if ((eDate.equals("No End Date Set") || eDate.equals("End Date Required")) || eDate == null) {
             endText.setText("End Date Required");
             return false;
         }
+        if ((eTime.equals("No End Time Set") || eTime.equals("End Time Required")) || eTime == null) {
+            endTimeText.setText("End Time Required");
+            return false;
+        }
+        end = DateStringFormatter.formatDateTimeForDatabase(eDate, eTime);
         if (start.after(end)) {
             endText.setText("End Date Must Be After Start Date");
             return false;
@@ -224,6 +264,7 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
 
         setupSwitch();
         setUpDatePickers();
+        setupTimePickers();
     }
 
     /**
@@ -245,6 +286,20 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         });
     }
 
+    private void setupTimePickers() {
+        startTime.setOnClickListener(v -> {
+            TimePickerFragment timePickerFragment = TimePickerFragment.newInstance();
+            timePickerFragment.callback(timeSetListener);
+            timePickerFragment.show(getChildFragmentManager().beginTransaction(), "TimePickerFragment");
+        });
+
+        endTime.setOnClickListener(v -> {
+            TimePickerFragment timePickerFragment = TimePickerFragment.newInstance();
+            timePickerFragment.callback(endTimeSetListener);
+            timePickerFragment.show(getChildFragmentManager().beginTransaction(), "TimePickerFragment");
+        });
+    }
+
     private void setupSwitch() {
         typeSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             isPerformance = b;
@@ -263,10 +318,16 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         assessTitle.setHint("");
 
         start = detailedAssessment.getStartDate();
-        startText.setText(DateStringFormatter.getText(start, true));
+        sDate = DateStringFormatter.getDateText(start, true);
+        startText.setText(sDate);
+        sTime = DateStringFormatter.getTimeText(start);
+        startTimeText.setText(sTime);
 
         end = detailedAssessment.getEndDate();
-        endText.setText(DateStringFormatter.getText(end, true));
+        eDate = DateStringFormatter.getDateText(end, true);
+        endText.setText(eDate);
+        eTime = DateStringFormatter.getTimeText(end);
+        endTimeText.setText(eTime);
 
         saveButton.setText("Update");
         saveButton.setOnClickListener(v -> {
@@ -274,6 +335,7 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
             assessTitle.setEnabled(true);
             spinner.setEnabled(true);
             setUpDatePickers();
+            setupTimePickers();
             updatedSaveButton();
         });
 

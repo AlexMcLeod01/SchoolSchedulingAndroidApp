@@ -78,7 +78,7 @@ public class AssessmentListFragment extends Fragment implements RecyclerAdapter.
 
     private void displayAssessments(View view) {
         //Display a list of items
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
         List<String> assessmentText = new ArrayList<>();
         List<AssessmentObj> assessments = tdb.getAssessments();
         for (AssessmentObj a : assessments) {
@@ -88,8 +88,8 @@ public class AssessmentListFragment extends Fragment implements RecyclerAdapter.
             } else {
                 perf = "Objective Assessment";
             }
-            assessmentText.add(a.getId() + ": " + a.getTitle() + " Start: " + dateFormat.format(a.getStartDate())
-                    + " End: " + dateFormat.format(a.getEndDate()) + " Type: " + perf + "\n");
+            assessmentText.add(a.getId() + ": " + a.getTitle() + "\nStart: " + dateFormat.format(a.getStartDate())
+                    + " \nEnd: " + dateFormat.format(a.getEndDate()) + "\nType: " + perf + "\n");
         }
         if (assessmentText.size() == 0) {
             assessmentText.add("No Assessments Yet");
@@ -116,6 +116,4 @@ public class AssessmentListFragment extends Fragment implements RecyclerAdapter.
             Assessments.setSelectedAssessment(tdb.getAssessmentById(Integer.parseInt(stringId)));
         }
     }
-
-    //Todo Alerts for all start and end dates for each assessment
 }

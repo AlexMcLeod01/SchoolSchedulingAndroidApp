@@ -9,6 +9,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 
 public class NotificationPublisher extends BroadcastReceiver {
@@ -27,6 +29,8 @@ public class NotificationPublisher extends BroadcastReceiver {
         }
 
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
+        Vibrator vibrate = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrate.vibrate(2000);
         assert manager != null;
         manager.notify(id, notification);
     }

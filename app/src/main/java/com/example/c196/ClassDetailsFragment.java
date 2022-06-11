@@ -268,6 +268,7 @@ public class ClassDetailsFragment extends Fragment implements AdapterView.OnItem
         saveButton.setOnClickListener(v -> {
             if (validateForm()) {
                 if (newCourse.getId() >= 0) {
+                    newCourse.setTermId(detailedClass.getTermId());
                     tdb.updateCourse(newCourse);
                 } else {
                     tdb.addCourse(newCourse);

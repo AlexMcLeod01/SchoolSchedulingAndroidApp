@@ -10,15 +10,6 @@ public class DateStringFormatter {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
 
-    public static String getDateText(Date date, boolean fromDatabase) {
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(date);
-        int y = cal.get(Calendar.YEAR);
-        int m = cal.get(Calendar.MONTH);
-        int d = cal.get(Calendar.DAY_OF_MONTH);
-        return formatDateForText(y, m, d, fromDatabase);
-    }
-
     public static String getTimeText(Date date) {
         Calendar cal = new GregorianCalendar();
         cal.setTime(date);
@@ -73,7 +64,7 @@ public class DateStringFormatter {
 
     public static String formatTimeForText(int hour, int minute) {
         int h = hour;
-        String pm = null;
+        String pm = "AM";
         String m;
         if (hour > 12) {
             h -= 12;

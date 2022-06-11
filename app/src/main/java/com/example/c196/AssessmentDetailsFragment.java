@@ -318,13 +318,13 @@ public class AssessmentDetailsFragment extends Fragment implements AdapterView.O
         assessTitle.setHint("");
 
         start = detailedAssessment.getStartDate();
-        sDate = DateStringFormatter.getDateText(start, true);
+        sDate = DateStringFormatter.getText(start, true);
         startText.setText(sDate);
         sTime = DateStringFormatter.getTimeText(start);
         startTimeText.setText(sTime);
 
         end = detailedAssessment.getEndDate();
-        eDate = DateStringFormatter.getDateText(end, true);
+        eDate = DateStringFormatter.getText(end, true);
         endText.setText(eDate);
         eTime = DateStringFormatter.getTimeText(end);
         endTimeText.setText(eTime);

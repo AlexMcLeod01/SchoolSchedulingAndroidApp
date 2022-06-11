@@ -19,6 +19,7 @@ import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +28,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -54,7 +57,7 @@ public class MainFragment extends Fragment {
     TermDataBase tdb;
 
     //Notification Channel ID
-    public static final String NOTIFICATION_CHANNEL_ID = "10001";
+    public static String NOTIFICATION_CHANNEL_ID = "10001";
     private static final String default_notification_channel_id = "default";
 
     //Data for passin'
@@ -131,9 +134,9 @@ public class MainFragment extends Fragment {
     private void fillTextViews() {
         List<TermObj> terms = tdb.getTerms();
         TermObj currentTerm = null;
+        Date now = new Date();
         for (TermObj t : terms) {
             if (t.getId() > 0) {
-                Date now = new Date();
                 if (t.getStartDate().before(now) || t.getStartDate().equals(now)) {
                     if (t.getEndDate().equals(now) || t.getEndDate().after(now)) {
                         currentTerm = t;
@@ -146,7 +149,16 @@ public class MainFragment extends Fragment {
         }
         term.setText(currentTerm.getTitle());
 
+        //Get remaining time
+        long tRemain = currentTerm.getEndDate().getTime() - now.getTime();
+        long days = ((((tRemain / 1000) / 60) / 60) / 24) + 1;
+
+
+        String remain = days + " Days";
+        timeRemaining.setText(remain);
+
         courses = tdb.getCourseByTermId(currentTerm.getId());
+        System.out.println(courses.size());
         assessmentList = new ArrayList<AssessmentObj>();
         StringBuilder courseText = new StringBuilder();
         for (CourseObj c : courses) {
@@ -181,35 +193,40 @@ public class MainFragment extends Fragment {
         classNotify.setOnClickListener(v -> {
             Date now = new Date();
             CourseObj c = (CourseObj) classSpinner.getSelectedItem();
-            long diff = c.getStartDate().getTime();// - now.getTime();
-            Notification not1 = getNotification("Class Upcoming:", c.getTitle() + /**" Starts on " + c.getStartDate() + */" diff " + diff);
-            scheduleNotification(not1, diff);
+            long diff = SystemClock.elapsedRealtime() + (c.getStartDate().getTime() - now.getTime());
+            NOTIFICATION_CHANNEL_ID = "10001";
+            Notification not1 = getNotification("Class Upcoming:", c.getTitle() + " Starts on " + c.getStartDate());
+            scheduleNotification(not1, diff, 3);
 
-            diff = c.getEndDate().getTime();// - now.getTime();
-            Notification not2 = getNotification("Class Ending:", c.getTitle() + /**" Ends on " + c.getEndDate() +*/ " diff " + diff);
-            scheduleNotification(not2, diff);
+            diff = SystemClock.elapsedRealtime() + (c.getEndDate().getTime() - now.getTime());
+            NOTIFICATION_CHANNEL_ID = "10002";
+            Notification not2 = getNotification("Class Ending:", c.getTitle() + " Ends on " + c.getEndDate());
+            scheduleNotification(not2, diff, 4);
         });
         assessNotify.setOnClickListener(v -> {
             Date now = new Date();
             AssessmentObj a = (AssessmentObj) assessSpinner.getSelectedItem();
-            long diff = a.getStartDate().getTime();// - now.getTime();
-            Notification not1 = getNotification("Assessment Upcoming:", a.getTitle() + /**" Starts on " + a.getStartDate() + */" diff " + diff);
-            scheduleNotification(not1, diff);
+            long diff = SystemClock.elapsedRealtime() + (a.getStartDate().getTime() - now.getTime());
+            NOTIFICATION_CHANNEL_ID = "10003";
+            Notification not1 = getNotification("Assessment Upcoming:", a.getTitle() + " Starts on " + a.getStartDate());
+            scheduleNotification(not1, diff, 1);
 
-            diff = a.getEndDate().getTime();// - now.getTime();
-            Notification not2 = getNotification("Assessment Upcoming:", a.getTitle() + /**" Ends on " + a.getEndDate() + */" diff " + diff);
-            scheduleNotification(not2, diff);
+            diff = SystemClock.elapsedRealtime() + (a.getEndDate().getTime() - now.getTime());
+            NOTIFICATION_CHANNEL_ID = "10004";
+            Notification not2 = getNotification("Assessment Upcoming:", a.getTitle() + " Ends on " + a.getEndDate());
+            scheduleNotification(not2, diff, 2);
         });
     }
 
-    private void scheduleNotification(Notification notification, long delay) {
+    private void scheduleNotification(Notification notification, long delay, int id) {
         Intent intent = new Intent(getContext(), NotificationPublisher.class);
-        intent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        intent.putExtra(NotificationPublisher.NOTIFICATION_ID, id);
         intent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pending = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pending = PendingIntent.getBroadcast(getContext(), id, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarm = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        assert alarm != null;
-        alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, delay, pending);
+        if (alarm != null) {
+            alarm.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, delay, pending);
+        }
     }
 
     private Notification getNotification(String title, String text) {

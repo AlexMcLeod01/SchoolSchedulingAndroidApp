@@ -194,12 +194,12 @@ public class MainFragment extends Fragment {
             Date now = new Date();
             CourseObj c = (CourseObj) classSpinner.getSelectedItem();
             long diff = SystemClock.elapsedRealtime() + (c.getStartDate().getTime() - now.getTime());
-            NOTIFICATION_CHANNEL_ID = "10001";
+            NOTIFICATION_CHANNEL_ID = "10003";
             Notification not1 = getNotification("Class Upcoming:", c.getTitle() + " Starts on " + c.getStartDate());
             scheduleNotification(not1, diff, 3);
 
             diff = SystemClock.elapsedRealtime() + (c.getEndDate().getTime() - now.getTime());
-            NOTIFICATION_CHANNEL_ID = "10002";
+            NOTIFICATION_CHANNEL_ID = "10004";
             Notification not2 = getNotification("Class Ending:", c.getTitle() + " Ends on " + c.getEndDate());
             scheduleNotification(not2, diff, 4);
         });
@@ -207,12 +207,12 @@ public class MainFragment extends Fragment {
             Date now = new Date();
             AssessmentObj a = (AssessmentObj) assessSpinner.getSelectedItem();
             long diff = SystemClock.elapsedRealtime() + (a.getStartDate().getTime() - now.getTime());
-            NOTIFICATION_CHANNEL_ID = "10003";
+            NOTIFICATION_CHANNEL_ID = "10001";
             Notification not1 = getNotification("Assessment Upcoming:", a.getTitle() + " Starts on " + a.getStartDate());
             scheduleNotification(not1, diff, 1);
 
             diff = SystemClock.elapsedRealtime() + (a.getEndDate().getTime() - now.getTime());
-            NOTIFICATION_CHANNEL_ID = "10004";
+            NOTIFICATION_CHANNEL_ID = "10002";
             Notification not2 = getNotification("Assessment Upcoming:", a.getTitle() + " Ends on " + a.getEndDate());
             scheduleNotification(not2, diff, 2);
         });

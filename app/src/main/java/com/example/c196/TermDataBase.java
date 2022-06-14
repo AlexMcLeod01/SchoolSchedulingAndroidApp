@@ -594,7 +594,7 @@ public class TermDataBase extends SQLiteOpenHelper {
         if (assess.getCourseId() < 0) {
             assess.setCourseId(0);
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd ");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(AssessmentsTable.ASSESSMENT_TITLE, assess.getTitle());
